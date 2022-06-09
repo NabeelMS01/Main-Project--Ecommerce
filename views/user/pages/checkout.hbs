@@ -1,0 +1,311 @@
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-option">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="breadcrumb__text">
+                    <h4>Check Out</h4>
+                    <div class="breadcrumb__links">
+                        <a href="./index.html">Home</a>
+                        <a href="./shop.html">Shop</a>
+                        <span>Check Out</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
+<button type="button" class="primary-btn m-auto " data-toggle="modal" data-target=".bd-example-modal-lg">Select Another
+    address</button>
+<!-- Checkout Section Begin -->
+<section class="checkout spad">
+
+    <div class="container">
+        <div class="checkout__form">
+            <form id="checkout-form">
+                <div class="row">
+                    <div class="col-lg-8 col-md-6">
+
+                        <h6 class="checkout__title">Billing Details</h6>
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <div class="checkout__input">
+                                    <p>Full Name<span>*</span><span id="nameSpan"></span></p>
+                                    <input onkeyup="return validName()" value="{{address.name}}" id="name" name="name"
+                                        type="text">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="checkout__input">
+                            <p>Address<span>*</span><span id="addressSpan"></span></p>
+                            <input id="addresss" name="address" value="{{address.address}}"
+                                onkeyup="return validAddress()" type="text" placeholder="Street Address"
+                                class="checkout__input__add">
+
+                        </div>
+
+
+                        <div class="checkout__input">
+                            <p>Postcode / ZIP<span>*</span> <span id="pincodeSpan"></span></p>
+
+                            <input id="pincode" onkeyup="return validPincode()" name="pincode"
+                                value="{{address.pincode}}" type="number" placeholder="pincode">
+                        </div>
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="checkout__input">
+                                    <p>Phone<span>*</span> <span id="phoneSpan"></span></p>
+                                    <input id="phone" onkeyup="return validPhone()" value="{{address.phone}}"
+                                        name="phone" type="number">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="checkout__input">
+                                    <p>Email<span>*</span><span id="emailSpan"></span></p>
+                                    <input id="email" onkeyup="return validEmail()" value="{{address.email}}"
+                                        name="email" type="email">
+                                </div>
+                            </div>
+                        </div>
+
+
+                        <div class="checkout__input">
+                            <p>Order notes<span>*</span></p>
+                            <input id="ordernote" name="ordernote" type="text"
+                                placeholder="Notes about your order, e.g. special notes for delivery.">
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6">
+                        <div class="checkout__order">
+                            <h4 class="order__title">Your order</h4>
+                            <div class="checkout__order__products"> <span>Total</span></div>
+
+                            <ul class="checkout__total__all">
+                                <li>Subtotal <span>₹ {{totalAmount}}</span></li>
+                                <li>Total<span> ₹ {{totalAmount}}</span></li>
+                            </ul>
+
+
+                            <div class="checkout__input__checkbox">
+                                <label>
+                                    COD
+                                    <input name="payment-method" type="checkbox" id="payment" value="cod" checked>
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                            <div class="checkout__input__checkbox">
+                                <label>
+                                    Online Payment
+                                    <input name="payment-method" type="checkbox" value="online">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                            <input type="text" name="userId" id="" value="{{user._id}}" hidden>
+                            <button onclick="return validation()" type="submit" class="site-btn">PLACE ORDER</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="m-auto">
+                <h3>Select an address</h3>
+            </div>
+
+
+            <form id="form-addAddress" method="post" action="/add-default-address" class=" m-5">
+
+                {{#each addresses}}
+                <!-- 2 column grid layout with text inputs for the first and last names -->
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="addressId" value="{{this._id}}"
+                        id="flexRadioDefault1" required>
+
+
+                    <label class="form-check-label" for="flexRadioDefault1">
+                        <p>
+                            {{this.name}} <br> {{this.email}} <br>{{this.address}} <br>{{this.pincode}}
+                        </p>
+                    </label>
+                </div>
+
+                {{/each}}
+
+
+                <!-- Message input -->
+                <button type="submit" class="primary-btn btn-lg btn-block">
+                    Select
+                </button>
+
+
+            </form>
+
+
+
+
+
+
+
+
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Checkout Section End -->
+
+<!-- Footer Section Begin -->
+
+<!-- Footer Section End -->
+
+<!-- Search Begin -->
+<div class="search-model">
+    <div class="h-100 d-flex align-items-center justify-content-center">
+        <div class="search-close-switch">+</div>
+        <form class="search-model-form">
+            <input type="text" id="search-input" placeholder="Search here.....">
+        </form>
+    </div>
+</div>
+
+
+
+<script>
+
+
+    $('#checkout-form').submit((e) => {
+
+        $.ajax(
+            {
+                url: '/place-order',
+                method: 'post',
+                data: $('#checkout-form').serialize(),
+                success: (response) => {
+
+                    if (response.status) {
+
+                        (
+                            () => {
+                                swal("Your Order has been placed!", "success").then(
+                                    location.href = "/"
+                                )
+                            }
+                        )()
+
+                    }
+                }
+            }
+        )
+
+
+    })
+
+
+</script>
+
+
+
+
+
+<script>
+
+
+    var errorEmail = document.getElementById('emailSpan')
+    var errorName = document.getElementById('nameSpan')
+    var errorAddress = document.getElementById('addressSpan')
+    var errorPhone = document.getElementById('phoneSpan')
+    var errorPincode = document.getElementById('pincodeSpan')
+
+
+
+
+
+    function validEmail() {
+        const name = document.getElementById('email').value
+        if (name == "") {
+            errorEmail.innerHTML = "enter you email address"
+            return false
+
+
+        }
+        if (!name.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
+            errorEmail.innerHTML = 'enter a proper email adress'
+            return false
+        }
+
+        errorEmail.innerHTML = null
+        return true
+    }
+    function validAddress() {
+        const name = document.getElementById('addresss').value
+        if (name == "") {
+            errorAddress.innerHTML = "address cannot be empty"
+            return false
+        } else if (name.length < 5) {
+            errorAddress.innerHTML = "enter a valid address"
+            return false
+        }
+
+        errorAddress.innerHTML = null
+        return true
+    }
+    function validName() {
+        const name = document.getElementById('name').value
+        if (name == "") {
+            errorName.innerHTML = "name cannot be empty"
+            return false
+        } else if (name.length < 3) {
+            errorName.innerHTML = "enter a valid name"
+            return false
+        }
+
+        errorName.innerHTML = null
+        return true
+    }
+    function validPhone() {
+        const name = document.getElementById('phone').value
+        if (name == "") {
+            errorPhone.innerHTML = "phone number cannot be empty"
+            return false
+        } else if (name.length < 10) {
+            errorPhone.innerHTML = "enter a valid phone"
+            return false
+        }
+
+        errorPhone.innerHTML = null
+        return true
+    }
+    function validPincode() {
+        const name = document.getElementById('pincode').value
+        if (name == "") {
+            errorPincode.innerHTML = "pincode cannot be empty"
+            return false
+        } else if (name.length < 3) {
+            errorPincode.innerHTML = "enter a valid pin"
+            return false
+        }
+
+        errorPincode.innerHTML = null
+        return true
+    }
+
+    function validation() {
+        if (!validEmail() && !validAddress() && !validName() && !validPhone() && !validPincode()) {
+            return false
+        } else if (!validEmail() || !validAddress() || !validName() || !validPincode() || !validPhone()) {
+            return false
+        } else { return true }
+
+    }
+</script>

@@ -1,0 +1,195 @@
+<hr />
+<div class="container bootstrap snippet" style="height: 650px;">
+
+  <div class="row">
+    <div class="col-sm-2">
+      <!--left col-->
+
+      <ul class="list-group">
+        <li class="list-group-item text-muted">
+          Menu
+          <i class="fa fa-dashboard fa-1x"></i>
+        </li>
+        <li class="list-group-item text-right">
+          <span class="pull-left"><strong>
+              <a href="/orders"> Orders</a>
+            </strong></span>
+        </li>
+        <li class="list-group-item text-right"><span class="pull-left"><strong><a href="/account-addresses"> Address</a>
+            </strong></span>
+        </li>
+        <li class="list-group-item text-right"><span class="pull-left"><strong><a href="account-password-change">Change
+                Password </a>
+            </strong></span>
+        </li>
+        <li class="list-group-item text-right"><span class="pull-left"><strong><a href=""></a> </strong></span>
+        </li>
+      </ul>
+
+      {{! <div class="panel panel-default">
+        <div class="panel-heading">Social Media</div>
+        <div class="panel-body">
+          <i class="fa fa-facebook fa-2x"></i> <i class="fa fa-github fa-2x"></i> <i class="fa fa-twitter fa-2x"></i> <i
+            class="fa fa-pinterest fa-2x"></i> <i class="fa fa-google-plus fa-2x"></i>
+        </div>
+      </div> }}
+
+    </div>
+    <!--/col-3-->
+    <div class="col-sm-10">
+      {{#if orders}}
+      <!-- Basic Bootstrap Table -->
+      <div class="card">
+        <h5 class="card-header">Table Basic</h5>
+        <div class="table-responsive text-nowrap">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Item</th>
+                <th>Phone</th>
+                <th>address</th>
+                <th>Status </th>
+                <th>Date</th>
+                <th>Cancel</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <tbody class="table-border-bottom-0">
+              {{#each orders}}
+
+              <tr>
+                <td><strong>
+
+                    {{#each this.products}}
+                    -{{product.name}},
+                    <br />
+                    {{/each}}
+
+                  </strong></td>
+
+                <td>{{this.deliveryDetails.mobile}}</td>
+                <td>
+                  {{this.deliveryDetails.address}}
+                </td>
+                <td> {{this.status}} </td>
+                <td> {{this.date}}</td>
+
+                <td>
+
+                  <span onclick="cancelOrder('{{this._id}}')" class=" badge bg-label-primary me-1"><a
+                      class="confirm_del " style=" text-decoration: none; color: white;"
+                      value="{{this._id}}">Cancel</a></span>
+
+                </td>
+
+                <td>
+
+                  <span class="badge bg-label-primary me-1"><a style="text-decoration: none; color: white;"
+                      href="/cancel-order">Details</a></span>
+
+                </td>
+
+              </tr>
+
+              {{/each}}
+
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {{else}}
+
+      <h3>You haven't ordered yet</h3>
+
+      {{/if}}
+      {{!***************************************** Table end *************************}}
+    </div>
+
+  </div>
+  <!--/col-9-->
+</div>
+<!--/row-->
+
+<script>
+
+
+  // $(document).ready(function () {
+  // $('.confirm_del').click(function (e) {
+
+
+  //})
+
+  //})
+
+
+
+
+
+
+
+  function cancelOrder(orderId) {
+
+
+
+
+    console.log(orderId)
+    swal({
+      title: "Are you sure? You want to cancel the order",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+
+
+          $.ajax(
+            {
+              url: `/cancel-order/${orderId}`,
+              method: 'get',
+
+              success: (response) => {
+
+                if (response.status) {
+
+                  swal("Poof! Your order has been canceled!", {
+                    icon: "success",
+
+
+
+                  });
+                  location.href = "/orders"
+                }
+              }
+            }
+          )
+
+
+
+
+
+
+        } else {
+          swal("Your order is not cancelled");
+        }
+      });
+
+
+
+
+
+
+    console.log(orderId)
+
+
+
+
+  }
+</script>
+
+
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>

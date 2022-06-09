@@ -1,0 +1,275 @@
+
+<section class="shopping-cart spad">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="shopping__cart__table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th> </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            {{#each products }}
+                            <tr>
+
+                                <td class="product__cart__item">
+                                    <div class="product__cart__item__pic">
+                                        <img style="width: 80px;" src="/uploads/{{this.product.images.[0]}}" alt="">
+                                    </div>
+                                    <div class="product__cart__item__text">
+                                        <h6>{{this.product.name}}</h6>
+                                   
+                                    </div>
+                                </td>
+
+
+                                <td class="quantity__item">
+
+                                  
+                                    <button class="cart-item-count"
+                                        style="border: none  ;background-color: rgba(0, 0, 0, 0);font-size: 20px"
+                                        onclick='changeQuantity("{{this._id}}","{{this.product._id}}","{{../user._id}}",-1 ) '>-</button>
+
+                          
+
+                                    <span id="{{this.product._id}}"> {{this.quantity}} </span>
+                                    <button class="cart-item-count"
+                                        style="border: none  ;background-color: rgba(0, 0, 0, 0); font-size: 20px;"
+                                        onclick='changeQuantity("{{this._id}}","{{this.product._id}}","{{../user._id}}", 1 )'>+</button>
+                                </td>
+                                <td class="cart__price">₹ {{this.product.price}}</span></td>
+                                <td class="cart__close"><i onclick='removeCartProduct( "{{this._id}}","{{this.product._id}}" )' class="fa fa-close"></i></td>
+                            </tr>
+                            {{/each}}
+
+
+
+                        </tbody>
+                    </table>
+                </div>
+               
+            </div>
+            <div class="col-lg-4">
+                <div class="cart__discount">
+                    <h6>Discount codes</h6>
+                    <form action="#">
+                        <input type="text" placeholder="Coupon code">
+                        <button type="submit">Apply</button>
+                    </form>
+                </div>
+                <div class="cart__total">
+                    <h6>Cart total</h6>
+                    <ul>
+              <li>Subtotal <span>₹ <span id="totalAmount">{{totalAmount}} </span></span></li> 
+              <li>Total <span>₹   <span id="totalAmount">{{totalAmount}} </span></span></li>
+                    </ul>
+                    {{!-- <a href="/place-order"  class="primary-btn" ></a> --}}
+
+                    <button type="button" class="primary-btn ml-auto mr-auto pl-5 pr-5" data-toggle="modal" data-target=".bd-example-modal-lg">CHECKOUT</button>
+
+
+
+
+                    
+                </div>
+            </div>
+        </div>
+
+
+<!-- Button trigger modal -->
+    </div>
+</section> 
+<!-- Shopping Cart Section End -->
+
+    <!--/col-3-->
+
+        <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="m-auto">
+            <h3 >Select an address</h3>
+        </div>
+      
+
+ <form id="form-addAddress" method="post" action="/add-default-address" class=" m-5">
+
+     {{#each addresses}}
+          <!-- 2 column grid layout with text inputs for the first and last names -->
+    <div class="form-check">
+  <input class="form-check-input" type="radio" name="addressId" value="{{this._id}}" id="flexRadioDefault1" required >
+
+
+  <label class="form-check-label" for="flexRadioDefault1">
+   <p>
+        {{this.name}} <br> {{this.email}} <br>{{this.address}} <br>{{this.pincode}}
+   </p>
+  </label>
+</div>
+
+{{/each}}
+
+         
+          <!-- Message input -->
+             <button  type="submit" class="primary-btn btn-lg btn-block">
+         <h5>select</h5>
+        </button>
+
+         
+        </form>
+
+
+
+  
+
+
+
+
+    </div>
+  </div>
+</div>
+   
+
+
+
+            
+
+      
+
+
+
+            {{!***************************************** Table end *************************}}
+        </div>
+
+    </div>
+    <!--/col-9-->
+</div>
+<!--/row-->
+
+
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+  
+
+    function removeCartProduct(cartId,proId){
+
+  swal({
+      title: "Are you sure? You want to remove the product from cart",
+      icon: "warning",
+      buttons: true,
+      dangerMode: true,
+    })
+      .then((willDelete) => {
+        if (willDelete) {
+
+
+
+        $.ajax(
+            {
+                url: '/remove-cart-product',
+                data: {
+                    cart: cartId,
+                    product: proId,
+                   
+                },
+                method: "POST",
+                success: (response) => {
+                    if(response.removeCartProduct){
+
+
+                    swal("Poof! Product deleted from cart!", {
+                    icon: "success",
+                  }).then(
+                      ()=>{
+                          location.reload()
+                      }
+                  )
+
+
+
+                           
+                    }
+               
+
+                }
+            }
+        )
+        }
+    })}
+
+
+
+
+//-----------------change quantity-----------------------------------------------------------------------
+    function changeQuantity(cartId, proId,userId, count) {
+        let quantity =parseInt(document.getElementById(proId).innerHTML)
+           count=parseInt(count)
+        $.ajax(
+            {
+                url: '/change-product-quantity',
+                data: {
+                    user:userId,
+                    cart: cartId,
+                    product: proId,
+                    count: count,
+                    quantity:quantity,
+          
+                  
+                },
+                method: "POST",
+                success: (response) => {
+
+
+
+                    if (response.removeProduct) {
+                    /*    console.log(response.status);
+                        let count = ₹(`#₹{proId}`).html()
+                        count = parseInt(count);
+                        ₹(`#₹{proId}`).html(count) */
+                       swal("Poof! Product deleted from cart!", {
+                    icon: "success",
+                  }).then(()=>{
+                     location.reload()
+                  });
+                    }else{
+                                   document.getElementById(proId).innerHTML=quantity+count
+                                   document.getElementById('totalAmount').innerHTML = response.totalAmount
+                       
+                    }             
+
+
+                }
+            }
+        )
+
+    }
+
+</script>
+
+
