@@ -33,7 +33,7 @@
 
                                   
                                     <button class="cart-item-count"
-                                        style="border: none  ;background-color: rgba(0, 0, 0, 0);font-size: 20px"
+                                        style="border: none  ;background-color: rgba(0, 0, 255, 0);font-size: 20px"
                                         onclick='changeQuantity("{{this._id}}","{{this.product._id}}","{{../user._id}}",-1 ) '>-</button>
 
                           
@@ -70,10 +70,12 @@
               <li>Total <span>₹   <span id="totalAmount">{{totalAmount}} </span></span></li>
                     </ul>
                     {{!-- <a href="/place-order"  class="primary-btn" ></a> --}}
-
+          {{#if addresses}}
                     <button type="button" class="primary-btn ml-auto mr-auto pl-5 pr-5" data-toggle="modal" data-target=".bd-example-modal-lg">CHECKOUT</button>
-
-
+       {{else}}
+  <button type="button" onclick="location.href='/place-order'" class="primary-btn ml-auto mr-auto pl-5 pr-5" >CHECKOUT</button>
+       {{/if}}
+                
 
 
                     
@@ -95,6 +97,7 @@
         <div class="m-auto">
             <h3 >Select an address</h3>
         </div>
+        
       
 
  <form id="form-addAddress" method="post" action="/add-default-address" class=" m-5">
@@ -175,6 +178,13 @@
 
 
 <script>
+     
+
+
+
+
+
+
   
 
     function removeCartProduct(cartId,proId){

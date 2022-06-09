@@ -89,6 +89,58 @@ module.exports = {
       }
     });
   },
+  doPasswordCheck:(userData,bodyData)=>{
+return new Promise(async(resolve,reject)=>{
+  console.log(bodyData.oldPassword);
+   console.log("0------------00000");
+
+ await bcrypt.compare(bodyData.old_password, userData.password ).then((status) => {
+   console.log(status);
+   console.log("0000000000000");
+  let response={}
+   
+    if (status) {
+    
+      response.status = true;
+      resolve(response);
+      console.log("Login succesful");
+    } else {
+      resolve({ status: false });
+      console.log("Login failed");
+    }
+  })
+
+
+
+
+})
+
+
+  },
+  changePassword:(userData,dataBody)=>{
+  return new Promise(async(resolve,reject)=>{
+    console.log("++++++++++++++++++++++++");
+    console.log(dataBody);
+    console.log("++++++++++++++++++++++++");
+
+  let password = await bcrypt.hash(dataBody.password,10)
+
+  await db.get().collection(collection.USER_COLLECTION).updateOne({_id:ObjectId(userData._id)},{
+    $set:{
+       password:password
+    }
+  },{upsert:true}).then(
+    resolve({status:true})
+  )
+
+
+  })
+
+
+
+  }
+  
+  ,
 
   getPhone: (email) => {
     return new Promise((resolve, reject) => {

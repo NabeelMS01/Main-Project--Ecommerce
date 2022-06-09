@@ -4,12 +4,12 @@
 
 
 function addToCart(proId){
-    console.log('----------------------------------');
+    console.log('-----------hhhhhhhhhhhhhhhh-----------------------');
     $.ajax({
         url:"/add-to-cart/"+proId,
         method:'get',
         success:(response)=>{
-            console.log('----------------------------------');
+            // console.log('----------------------------------');
           
          
       if(response.status){

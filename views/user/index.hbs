@@ -110,7 +110,7 @@
                 <div class="product__item">
                     <div onclick="location.href='/product-details/{{this._id}}';" class="product__item__pic set-bg"
                         data-setbg="uploads/{{this.images.[0]}}" >
-                        <span class="label">New</span>
+                        <span style="background-color: darkorange;" class="label" >New</span>
                         <ul class="product__hover">
                             {{!-- <li><a href="#"><img src="/img/icon/heart.png" alt=""></a></li>
                             <li><a href="#"><img src="/img/icon/compare.png" alt=""> <span>Compare</span></a></li>
@@ -122,7 +122,7 @@
                     <div class="product__item__text">
                         <h6>{{this.name}}</h6>
                         <a style="cursor: pointer;" class="add-cart">
-                             <button style="border:none ;background-color:rgba(0, 0, 0, 0);" onclick="addToCart('{{this._id}}')"  > + Add To Cart  </button>   </a> 
+                             <button style="border:none ;color: rgb(255, 0, 0); background-color:rgba(0, 0, 0, 0);" onclick="addToCart('{{this._id}}')"  > + Add To Cart  </button>   </a> 
 
                             <div class="rating">
                                 <i class="fa fa-star-o"></i>

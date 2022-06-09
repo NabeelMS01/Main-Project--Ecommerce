@@ -508,9 +508,62 @@ router.get('/account-password-change',verifyLogin,async(req,res)=>{
 
   let userData= await userHelper.getUserData(req.session.user._id)
 
-  res.render('user/pages/changePassword',{userData, userUi:true})
+  res.render('user/pages/changePassword',{userData, userUi:true, 
+    category: req.session.category,
+    cartCount: req.session.cartCount,
+    logedIn: req.session.loggedIn,
+ 
+    user: req.session.user,})
 
 })
+
+router.post('/account-password-change',async(req,res)=>{
+  console.log(req.body)
+  req.session.body=req.body
+  console.log("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+  let userData= await userHelper.getUserData(req.session.user._id)
+
+ await userHelper.doPasswordCheck(userData,req.body).then(async(response)=>{
+
+   if(response.status){
+
+    await userHelper.changePassword(userData,req.session.body).then((response)=>{
+      if(response.status){
+      
+      // res.redirect('/account-password-change')  
+      res.json({status:true})
+
+      }
+
+    })
+
+
+  
+   }else{
+
+    res.json({status:false})
+
+
+   }
+
+ })
+
+
+
+
+
+  // res.render('user/pages/changePassword',{userData, userUi:true, 
+  //   category: req.session.category,
+  //   cartCount: req.session.cartCount,
+  //   logedIn: req.session.loggedIn,
+ 
+  //   user: req.session.user,})
+
+})
+
+
+
+
 
 
 

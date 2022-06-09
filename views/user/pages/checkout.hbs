@@ -117,7 +117,10 @@
 <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-lg">
+{{#if addresses}}
         <div class="modal-content">
+
+
             <div class="m-auto">
                 <h3>Select an address</h3>
             </div>
@@ -151,13 +154,28 @@
             </form>
 
 
+        </div>
+{{else}}
+<div class="modal-content" >
 
 
+            <div class="m-auto">
+                <h3>Select an address</h3>
+            </div>
 
-
+  <div class="m-auto" style=" padding-top: 50px; height: 200px;" >
+                <h5>You do not have any address saved. Would you like to add an address? please  <a class="text-primary" href="/account-addresses"> click here </a></h5>
+            </div>
+           
 
 
         </div>
+
+
+{{/if}}
+
+
+
     </div>
 </div>
 
@@ -184,32 +202,37 @@
 <script>
 
 
-    $('#checkout-form').submit((e) => {
 
-        $.ajax(
-            {
-                url: '/place-order',
+    
+    $("#checkout-form").submit(function(e) {
+        console.log(e)
+     e.preventDefault()  // prevent actual form submit
+  
+  //get submit url [replace url here if desired]
+    $.ajax({
+           url: '/place-order',
                 method: 'post',
                 data: $('#checkout-form').serialize(),
-                success: (response) => {
+         success: function(response){
+            
+            if(response.status){
+                  swal("Poof! order placed", {
+                    icon: "success",
+                    buttons:true,
 
-                    if (response.status) {
-
-                        (
-                            () => {
-                                swal("Your Order has been placed!", "success").then(
-                                    location.href = "/"
-                                )
-                            }
-                        )()
-
-                    }
-                }
+                  }).then(()=>{
+            
+                     location.href='/account-addresses'
+                  }
+                  );
             }
-        )
 
 
-    })
+         }
+    });
+});
+
+
 
 
 </script>
