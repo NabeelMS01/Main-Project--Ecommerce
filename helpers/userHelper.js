@@ -664,6 +664,49 @@ if(cartProductTotalAmount[0].total==undefined){
 
 
   },
+  placeOrderOnline: (order, products, total) => {
+    return new Promise(async (resolve, reject) => {
+      
+      let status = order["payment_method"] === "cod" ? "placed" : "pending";
+
+
+      let orderObj = {
+        deliveryDetails: {
+          name: order.name,
+          mobile: order.phone,
+          address: order.address,
+          email: order.email,
+          pincode: order.pincode,
+        },
+        userId: ObjectId(order.userId),
+        paymentMethod: order["payment_method"],
+        products: products,
+        totalAmount: total,
+        date: moment().format("L"),
+        time: moment().format(),
+        status: status,
+      };
+
+      db.get()
+        .collection(collection.ORDER_COLLECTION)
+        .insertOne(orderObj)
+        .then(
+          
+          
+          (response) => {
+            resolve(response)
+          // db.get()
+          //   .collection(collection.CART_COLLECTION)
+          //   .deleteOne({ user: ObjectId(order.userId) });
+          //   console.log('333333333333333333333333333');
+          // console.log(response.insertedId.toString());
+          // resolve( response.insertedId.toString());
+        }
+        );
+    });
+
+
+  },
 
   //---------------------razor Pay integration------------------
 

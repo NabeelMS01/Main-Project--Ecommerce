@@ -214,13 +214,16 @@
                 method: 'post',
                 data: $('#checkout-form').serialize(),
          success: function(response){
-             if(response){
-                console.log("++++++++++///////////++++++++++")
+            
                 console.log(response)
-              
-                 razorpayPayment(response)
+             if(response.payment_status){
+            
+                console.log(payment_status)
+  
+                
+                 razorpayPayment(payment_status)
            
-            }
+            }else
             if(response.status==true){
                   swal("Poof! order placed", {
                     icon: "success",
@@ -228,7 +231,7 @@
 
                   }).then(()=>{
             
-                     location.href='/account-addresses'
+                     location.href='/'
                   }
                   );
             }

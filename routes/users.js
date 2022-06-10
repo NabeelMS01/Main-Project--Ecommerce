@@ -8,6 +8,13 @@ const async = require("hbs/lib/async");
 const { route } = require("../app");
 const upload = require("../middlewere/multer");
 const client = require("twilio")(config.accountSID, config.authToken);
+var rn = require('random-number');
+var options = {
+  min:  10000000
+, max:  99999999
+, integer: true
+}
+    
 // const instance = new Razorpay({
 //   key_id: 'rzp_test_dvEiQE98PIBRAI',
 //   key_secret: 'RatXLbroi7okrk5DQHDQvwIh',
@@ -360,8 +367,10 @@ router.get("/place-order", verifyLogin, async (req, res) => {
 
 router.post("/place-order", verifyLogin, async (req, res) => {
   console.log(req.body);
+  let orderId=   rn(options)
   let products = await userHelper.getCartProducts(req.body.userId);
   let totalPrice = await userHelper.getTotalAmount(req.body.userId);
+ 
 
 //   if(req.body.payment_method=="online"){
 //   console.log(products)
@@ -372,24 +381,42 @@ router.post("/place-order", verifyLogin, async (req, res) => {
 //   }
   
 //else 
-// if(req.body.payment_method=="cod"){
+ if(req.body.payment_method=="cod"){
   await userHelper.placeOrder(req.body, products, totalPrice).then((orderId) => {
 
-    if(req.body.payment_method=="cod"){
+  
       res.json({ status: true });
 
-    }else if(req.body.payment_method==""){
-      userHelper.generateRazorPay(orderId,totalPrice).then((response)=>{
-        res.json(response)
+   
 
-        console.log(response)
+  });}else{
 
-        console.log("here");
-      })
-    }
+    
+
+    // await userHelper.placeOrderOnline(req.body, products, totalPrice).then(async(orderId) => {
+req.session.recieptId=orderId
+console.log(orderId);
+console.log('hhhhhhhhhhhhhhhhhhhh');
+            
+
+  await userHelper.generateRazorPay(orderId,totalPrice).then((paymentResponse)=>{
+    console.log("777777777777777777777777")
+    console.log(paymentResponse)
+    res.json(paymentResponse)
+    console.log("777777777777777777777777")
+
+  })
+      
+
+    //   res.json({ payment_status: true });
+
+    // res.json({ status: true });
+  // });
+
+    
+  }
+
   
-
-  });
 
 },
 
