@@ -3,7 +3,10 @@
     <div class="container">
         <div class="row">
             <div class="col-lg-8">
+                   {{#if products}}
                 <div class="shopping__cart__table">
+
+                         
                     <table>
                         <thead>
                             <tr>
@@ -14,6 +17,8 @@
                             </tr>
                         </thead>
                         <tbody>
+
+                    
 
                             {{#each products }}
                             <tr>
@@ -48,13 +53,23 @@
                             </tr>
                             {{/each}}
 
-
+           
 
                         </tbody>
                     </table>
+  
+
                 </div>
-               
+               {{else}}
+<div >
+    
+    <h3 class="m-auto text-center" >Your cart is empty</h3></div>
+  {{/if}}
+
             </div>
+
+{{#if products}}
+
             <div class="col-lg-4">
                 <div class="cart__discount">
                     <h6>Discount codes</h6>
@@ -67,7 +82,7 @@
                     <h6>Cart total</h6>
                     <ul>
               <li>Subtotal <span>₹ <span id="totalAmount">{{totalAmount}} </span></span></li> 
-              <li>Total <span>₹   <span id="totalAmount">{{totalAmount}} </span></span></li>
+              <li>Total <span>₹   <span id="subTotal">{{totalAmount}} </span></span></li>
                     </ul>
                     {{!-- <a href="/place-order"  class="primary-btn" ></a> --}}
           {{#if addresses}}
@@ -81,6 +96,11 @@
                     
                 </div>
             </div>
+
+
+
+{{/if}}
+<div style="height: 200px;" ></div>
         </div>
 
 
@@ -270,7 +290,7 @@
                     }else{
                                    document.getElementById(proId).innerHTML=quantity+count
                                    document.getElementById('totalAmount').innerHTML = response.totalAmount
-                       
+                          document.getElementById('subTotal').innerHTML = response.totalAmount
                     }             
 
 

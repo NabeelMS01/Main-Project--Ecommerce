@@ -7,6 +7,12 @@ const { response } = require("../app");
 const { Db } = require("mongodb");
 const moment = require("moment");
 const ObjectId = require("mongodb").ObjectId;
+const Razorpay = require('razorpay');
+
+var instance = new Razorpay({
+  key_id: 'rzp_test_dvEiQE98PIBRAI',
+ key_secret: 'RatXLbroi7okrk5DQHDQvwIh',
+});
 
 module.exports = {
   //------------------sign up check---------------------
@@ -492,18 +498,26 @@ return new Promise(async(resolve,reject)=>{
           // }
         ])
         .toArray();
+if(cartProductTotalAmount[0].total==undefined){
+  resolve({status:true})
+}else{
+  console.log(cartProductTotalAmount);
 
-      console.log(cartProductTotalAmount);
+        console.log("************asdasdfasdf*****");
+        console.log(cartProductTotalAmount[0].total);
+  
+        resolve(cartProductTotalAmount[0].total);
+}
+      
 
-      console.log("************asdasdfasdf*****");
-      console.log(cartProductTotalAmount[0].total);
 
-      resolve(cartProductTotalAmount[0].total);
+        
+     
     });
   },
   getTotalAmount: (userId) => {
     return new Promise(async (resolve, reject) => {
-      let cartTotalAmount = await db
+  let cartTotalAmount=     await db
         .get()
         .collection(collection.CART_COLLECTION)
         .aggregate([
@@ -541,13 +555,24 @@ return new Promise(async(resolve,reject)=>{
             },
           },
         ])
-        .toArray();
+        .toArray()
+     
+ console.log(cartTotalAmount[0]);
+
+          if(cartTotalAmount[0]===undefined){
+            resolve()
+          }else{
+            resolve( cartTotalAmount[0].total)
+          }
+    
+
+        });
 
       // console.log("************asdasdfasdf*****");
       // console.log(cartTotalAmount[0].total);
 
-      resolve(cartTotalAmount[0].total);
-    });
+     
+
   },
   //*****************************get  CArt product TOtal ------------------- */
   getCartProductTotal: (userId) => {
@@ -603,7 +628,10 @@ return new Promise(async(resolve,reject)=>{
   // ------------------place order--------------------
   placeOrder: (order, products, total) => {
     return new Promise(async (resolve, reject) => {
-      let status = order["payment-method"] === "cod" ? "placed" : "pending";
+      
+      let status = order["payment_method"] === "cod" ? "placed" : "pending";
+
+
       let orderObj = {
         deliveryDetails: {
           name: order.name,
@@ -613,7 +641,7 @@ return new Promise(async(resolve,reject)=>{
           pincode: order.pincode,
         },
         userId: ObjectId(order.userId),
-        paymentMethod: order["payment-method"],
+        paymentMethod: order["payment_method"],
         products: products,
         totalAmount: total,
         date: moment().format("L"),
@@ -628,11 +656,36 @@ return new Promise(async(resolve,reject)=>{
           db.get()
             .collection(collection.CART_COLLECTION)
             .deleteOne({ user: ObjectId(order.userId) });
-          console.log(response);
-          resolve();
+            console.log('333333333333333333333333333');
+          console.log(response.insertedId.toString());
+          resolve( response.insertedId.toString());
         });
     });
+
+
   },
+
+  //---------------------razor Pay integration------------------
+
+generateRazorPay:(orderId,totalPrice)=>{
+  return new Promise((resolve,rject)=>{
+    var options = {
+      amount: totalPrice,  // amount in the smallest currency unit
+      currency: "INR",
+      receipt: orderId
+    };
+    instance.orders.create(options, function(err, order) {
+      console.log("new order"); 
+      console.log(order);
+      resolve(order)
+    });
+  })
+
+},
+
+
+
+  
   getCartProductList: (userId) => {
     return new Promise(async (resolve, reject) => {
       let products = await db

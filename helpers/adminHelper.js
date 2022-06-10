@@ -158,11 +158,11 @@ module.exports = {
   //---------------category-Management---------------
 
   addCategory: (category) => {
-   
-     
-
+    
     return new Promise(async (resolve, reject) => {
-      category.category_id= await ObjectId(category.category_id)
+      category.offer_percent=parseInt(category.offer_percent)
+      category.status=  true;
+     
       await db
         .get()
         .collection(collection.PRODUCT_CATEGORY)
@@ -173,7 +173,9 @@ module.exports = {
     });
   },
   addSubCategory: (subCategory) => {
+
     return new Promise(async (resolve, reject) => {
+      subCategory.category_id= await ObjectId(subCategory.category_id)
       await db
         .get()
         .collection(collection.SUB_CATEGORY_COLLECTION)

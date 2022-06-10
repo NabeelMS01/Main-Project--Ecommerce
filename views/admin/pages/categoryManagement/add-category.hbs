@@ -371,9 +371,12 @@
                       <form action="/admin/add-category" method="post">
                         <div class="mb-3">
                           <label class="form-label" for="basic-default-fullname">Category Name</label>
-                          <input type="text" name="category_name" class="form-control" id="basic-default-fullname" required />
+                          <input style="text-transform: uppercase" type="text" name="category_name" class="form-control" id="basic-default-fullname" required />
                         </div>
-                        
+                        <div class="mb-3">
+                          <label class="form-label" for="basic-default-fullname">Offer</label>
+                          <input type="number" name="offer_percent" value="0" class="form-control" id="basic-default-fullname"  />
+                        </div>
                         <button type="submit" class="btn btn-primary">Submit</button>
                       </form>
                     </div>

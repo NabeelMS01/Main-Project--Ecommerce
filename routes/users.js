@@ -8,9 +8,17 @@ const async = require("hbs/lib/async");
 const { route } = require("../app");
 const upload = require("../middlewere/multer");
 const client = require("twilio")(config.accountSID, config.authToken);
+// const instance = new Razorpay({
+//   key_id: 'rzp_test_dvEiQE98PIBRAI',
+//   key_secret: 'RatXLbroi7okrk5DQHDQvwIh',
+// });
 
-const verifyLogin = (req, res, next) => {
+
+const verifyLogin = async(req, res, next) => {
   if (req.session.loggedIn) {
+    cartCount = await userHelper.getCartCount(req.session.user._id);
+    req.session.cartCount=cartCount
+    
     next();
   } else {
     res.redirect("/login");
@@ -255,7 +263,7 @@ router.get("/product-details/:id", (req, res) => {
 
 router.get("/cart", verifyLogin,async (req, res) => {
   // adminHelper.getAllCategory().then((category) => {
-  // try{
+    cartCount = await userHelper.getCartCount(req.session.user._id);
  let products= await userHelper.getCartProducts(req.session.user._id) 
       let totalAmount = await userHelper.getTotalAmount(req.session.user._id);
       let addresses =await userHelper.getAddress(req.session.user._id);
@@ -265,7 +273,7 @@ router.get("/cart", verifyLogin,async (req, res) => {
         category: req.session.category,
         products,
         logedIn: req.session.loggedIn,
-        cartCount: req.session.cartCount,
+        cartCount: cartCount,
         user: req.session.user,
         totalAmount: req.session.totalAmount,
         addresses,
@@ -274,31 +282,8 @@ router.get("/cart", verifyLogin,async (req, res) => {
      
         
       });
-    
 
 
-
-
-
-
-
-  // let cartProductTotal = await userHelper.getCartProductTotal(req.session.user._id)
-
-  // }catch(e){
-
-  //   res.render("user/pages/cart", {
-  //     userUi: true,
-  //     category: req.session.category,
-
-  //     logedIn: req.session.loggedIn,
-
-  //     user: req.session.user,
-
-  //   });
-
-  // }
-
-  // });
 });
 
 router.get("/add-to-cart/:id", async (req, res) => {
@@ -334,6 +319,8 @@ router.post("/remove-cart-product", (req, res) => {
   });
 });
 
+//---------------add-default-address------------------
+
 router.post("/add-default-address", (req, res) => {
 console.log(req.body);
   userHelper.getDefaultAddress(req.body.addressId).then(async(response) => {
@@ -345,6 +332,9 @@ console.log("***********************");
     res.redirect('/place-order')
   });
 });
+
+
+//------------------------place-order-----------------------------
 
 router.get("/place-order", verifyLogin, async (req, res) => {
   if (!req.session.loggedIn) {
@@ -366,22 +356,53 @@ router.get("/place-order", verifyLogin, async (req, res) => {
    
   });
 
-  
-
-
 });
 
 router.post("/place-order", verifyLogin, async (req, res) => {
   console.log(req.body);
   let products = await userHelper.getCartProducts(req.body.userId);
   let totalPrice = await userHelper.getTotalAmount(req.body.userId);
+
+//   if(req.body.payment_method=="online"){
+//   console.log(products)
+//        console.log("online payment ")
+//  console.log(totalPrice)
+//  userHelper.generateRazorPay(order)
+       
+//   }
+  
+//else 
+// if(req.body.payment_method=="cod"){
+  await userHelper.placeOrder(req.body, products, totalPrice).then((orderId) => {
+
+    if(req.body.payment_method=="cod"){
+      res.json({ status: true });
+
+    }else if(req.body.payment_method==""){
+      userHelper.generateRazorPay(orderId,totalPrice).then((response)=>{
+        res.json(response)
+
+        console.log(response)
+
+        console.log("here");
+      })
+    }
   
 
- await userHelper.placeOrder(req.body, products, totalPrice).then((response) => {
-    res.json({ status: true });
-
   });
-});
+
+},
+
+ );
+
+router.post('/verify-payment',(req,res)=>{
+
+
+})
+
+
+
+
 
 //------------------------user  account ---------------------------
 router.get("/account", verifyLogin, async(req, res) => {
@@ -394,8 +415,9 @@ router.get("/account", verifyLogin, async(req, res) => {
     logedIn: req.session.loggedIn,
     userData:userData,
     user: req.session.user,
+
   });
-});
+}),
 
 
 
@@ -456,7 +478,7 @@ router.post('/edit-address/:id',(req,res)=>{
 })
 
 ,
-
+//------------------------edit-profile-----------------------------
 router.get("/edit-profile", verifyLogin,async (req, res) => {
   console.log(req.session.userData);
 
@@ -501,6 +523,40 @@ router.post("/edit-profile", upload.array("proImage"), (req, res, next) => {
 
   });
 });
+
+
+
+
+//------------------------Shop products-----------------------------
+
+
+
+router.get('/shop-by-category/:id',verifyLogin,async(req,res)=>{
+ 
+
+ res.render('user/pages/shop',{userUi:true,
+  category: req.session.category,
+  cartCount: req.session.cartCount,
+  logedIn: req.session.loggedIn, 
+  user: req.session.user,})
+
+})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //---------------account password change--------
