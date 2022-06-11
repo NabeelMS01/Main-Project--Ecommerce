@@ -98,8 +98,8 @@
                             </div>
                             <div class="checkout__input__checkbox">
                                 <label>
-                                    Online Payment
-                                    <input name="payment_method" type="radio" value="online">
+                                    Razorpay
+                                    <input name="payment_method" type="radio" value="razorpay">
                                     <span class="checkmark"></span>
                                 </label>
                             </div>
@@ -214,17 +214,12 @@
                 method: 'post',
                 data: $('#checkout-form').serialize(),
          success: function(response){
+
+
             
-                console.log(response)
-             if(response.payment_status){
-            
-                console.log(payment_status)
-  
                 
-                 razorpayPayment(payment_status)
-           
-            }else
-            if(response.status==true){
+       
+           if(response.codsuccess==true){
                   swal("Poof! order placed", {
                     icon: "success",
                     buttons:true,
@@ -234,49 +229,97 @@
                      location.href='/'
                   }
                   );
+            }else
+             if(response.paymentResponse){
+
+                
+                 razorpayPayment(response.paymentResponse,response.userData)
+           
             }
+           
 
 
          }
     });
 });
 
-function razorpayPayment(order){
-    console.log(order)
+function razorpayPayment(order,userData){
+ 
+
+
+    console.log(order.amount)
        console.log('......................................')
     var options = {
-    "key": "rzp_test_dvEiQE98PIBRAI", // Enter the Key ID generated from the Dashboard
+    "key": "rzp_test_r82SUG9YhhYa4M", // Enter the Key ID generated from the Dashboard
     "amount": order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
     "currency": "INR",
     "name": "Parrot Fashion",
     "description": "Test Transaction",
-    "image": "https://example.com/your_logo",
+    "image": "./img/logo.png",
     "order_id": order.id, //This is a sample Order ID. Pass the `id` obtained in the response of Step 1
     "handler": function (response){
-        alert(response.razorpay_payment_id);
-        alert(response.razorpay_order_id);
-        alert(response.razorpay_signature)
+        //alert(response.razorpay_payment_id);
+      //  alert(response.razorpay_order_id);
+      //  alert(response.razorpay_signature)
+        verifyPayment(response,order)
     },
     "prefill": {
-        "name": "Gaurav Kumar",
-        "email": "gaurav.kumar@example.com",
-        "contact": "9999999999"
+        "name": userData.name,
+        "email":userData.email,
+        "contact": userData.phone,
     },
     "notes": {
-        "address": "Razorpay Corporate Office"
+        "address": "Parrot fashion Corporate Office"
     },
     "theme": {
         "color": "#3399cc"
     }
 };
+var rzp1 = new Razorpay(options);
+ rzp1.open();
+
 }
 
- function verifyPayment(payment,order){
+ function verifyPayment(payment,order,){
 
     $.ajax({
+        method:"POST",
         url:'/verify-payment',
-        data:payment,order,
-        method:"POST"
+        data:{payment,
+        order,
+       },
+       success:(response)=>{
+         
+     if(response.paymentstatus){
+
+        swal("Poof! order placed", {
+                    icon: "success",
+                    buttons:true,
+
+                  }).then(()=>{
+            
+                     location.href='/'
+                  }
+                  );
+
+
+     }else if(!response.paymentstatus){
+
+           swal("Poof! order failed", {
+                    icon: "warning",
+                    buttons:true,
+
+                  }).then(()=>{
+            
+                     location.href='/cart'
+                  }
+                  );
+     }
+
+
+
+       }
+        
     })
 
  }

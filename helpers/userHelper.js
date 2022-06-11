@@ -8,10 +8,12 @@ const { Db } = require("mongodb");
 const moment = require("moment");
 const ObjectId = require("mongodb").ObjectId;
 const Razorpay = require('razorpay');
+const { resolve } = require("node:path");
+const { Hmac } = require("node:crypto");
 
 var instance = new Razorpay({
-  key_id: 'rzp_test_dvEiQE98PIBRAI',
- key_secret: 'RatXLbroi7okrk5DQHDQvwIh',
+  key_id: 'rzp_test_r82SUG9YhhYa4M',
+ key_secret: '3J69cSPac1Du7CjKKH9k8lKL',
 });
 
 module.exports = {
@@ -396,7 +398,7 @@ return new Promise(async(resolve,reject)=>{
         ])
         .toArray();
 
-      console.log("*****************");
+
       resolve(cartItems);
     });
   },
@@ -574,6 +576,7 @@ if(cartProductTotalAmount[0].total==undefined){
      
 
   },
+
   //*****************************get  CArt product TOtal ------------------- */
   getCartProductTotal: (userId) => {
     return new Promise(async (resolve, reject) => {
@@ -666,8 +669,10 @@ if(cartProductTotalAmount[0].total==undefined){
   },
   placeOrderOnline: (order, products, total) => {
     return new Promise(async (resolve, reject) => {
+
+      console.log(total)
       
-      let status = order["payment_method"] === "cod" ? "placed" : "pending";
+      let status = order["payment_method"] === "razorpay" ? "placed" : "pending";
 
 
       let orderObj = {
@@ -690,19 +695,14 @@ if(cartProductTotalAmount[0].total==undefined){
       db.get()
         .collection(collection.ORDER_COLLECTION)
         .insertOne(orderObj)
-        .then(
-          
-          
-          (response) => {
-            resolve(response)
-          // db.get()
-          //   .collection(collection.CART_COLLECTION)
-          //   .deleteOne({ user: ObjectId(order.userId) });
-          //   console.log('333333333333333333333333333');
-          // console.log(response.insertedId.toString());
-          // resolve( response.insertedId.toString());
-        }
-        );
+        .then((response) => {
+          db.get()
+            .collection(collection.CART_COLLECTION)
+            .deleteOne({ user: ObjectId(order.userId) });
+            console.log('333333333333333333333333333');
+          console.log(response.insertedId.toString());
+          resolve( response.insertedId.toString());
+        });
     });
 
 
@@ -719,13 +719,35 @@ generateRazorPay:(orderId,totalPrice)=>{
     };
     instance.orders.create(options, function(err, order) {
       console.log("new order"); 
-      console.log(order);
+      // console.log(order);
       resolve(order)
     });
   })
 
 },
 
+verifyPayment:(details)=>{
+    return new Promise((resolve,reject)=>{
+      let crypto = require('node:crypto');
+  
+      let hash = crypto.createHmac('sha256', '3J69cSPac1Du7CjKKH9k8lKL')
+      .update(details.payment.razorpay_order_id+'|'+details.payment.razorpay_payment_id)
+      .digest('hex');
+   
+   
+      if(hash==details.payment.razorpay_signature){
+   
+       console.log(hash)
+   
+        console.log("666666666666666")
+        resolve() 
+      }else{
+       reject()
+      }
+    })
+ 
+}
+,
 
 
   
