@@ -397,7 +397,7 @@
                       <div class="mb-3">
                         <span class="text-danger" id="categorySpan"> </span>
                         <select class="form-control" list="datalistOptions" id="category"
-                          onkeyup="return validCategory()" name="categoryId" style="text-transform:capitalize" />
+                          onkeyup="return validCategory()" name="category_id" style="text-transform:capitalize" />
                         <datalist id="datalistOptions">
                           {{#each category}}
                           <option value="{{this._id}}"> {{this.category_name}} </option>
@@ -420,10 +420,11 @@
                       <div class="mb-3">
                         <span class="text-danger" id="subCategorySpan"> </span>
                         <select class="form-control" list="datalistOptions" id="subCategory"
-                          onkeyup="return validSubCategory()" name="subCategoryId" style="text-transform:capitalize" />
+                          onkeyup="return validSubCategory()" name="sub_category_id" style="text-transform:capitalize" />
                         <datalist id="datalistOptions">
+                                <option value=null > Select </option>
                           {{#each subcategory}}
-                           <option value=null > Select </option>
+                     
                           <option value="{{this._id}}"> {{this.sub_category}} </option>
                           {{/each}}
 

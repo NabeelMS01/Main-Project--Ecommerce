@@ -49,8 +49,8 @@ module.exports = {
     product.images = files;
     product.price = parseInt(product.price);
     product.mrp = parseInt(product.mrp);
-    product.categoryId=ObjectId(product.categoryId);
-    product.subCategoryId=ObjectId(product.subCategoryId)
+    product.category_id=ObjectId(product.category_id);
+    product.sub_category_id=ObjectId(product.sub_category_id)
     product.status = true;
     return new Promise((resolve, reject) => {
       db.get()
@@ -103,7 +103,8 @@ module.exports = {
           {
             $set: {
               name: proDetails.name,
-              category: proDetails.category_name,
+              category_id: ObjectId(proDetails.category_id),
+              sub_category_id:ObjectId(proDetails.sub_category_id),
               mrp: proDetails.mrp,
               price: proDetails.price,
               description: proDetails.description,
@@ -266,6 +267,14 @@ return new db.get().collection(collection.SUB_CATEGORY_COLLECTION)
 
     resolve(orders)
     })
+  },
+  getOrderDetails:(id)=>{
+    return new Promise(async(resolve,response)=>{
+     let order =await db.get().collection(collection.ORDER_COLLECTION).find({_id:ObjectId(id)}).toArray()
+
+     resolve(order)
+    })
+
   }
 
 

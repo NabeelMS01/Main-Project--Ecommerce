@@ -10,6 +10,14 @@ const ObjectId = require("mongodb").ObjectId;
 const Razorpay = require('razorpay');
 const { resolve } = require("node:path");
 const { Hmac } = require("node:crypto");
+const paypal = require('paypal-rest-sdk');
+const { Console } = require("node:console");
+paypal.configure({
+  'mode': 'sandbox', //sandbox or live
+  'client_id': 'AXsoo5XqDTfQZQmjBTZTgM0npkYzCs6H90HKxMBZlhZJVceZsMHE5bEeRLPZFA2L13m7sfgbgdS3A-CT',
+  'client_secret': 'EBTeRIdqDmSixD6uWGmuDwFbM9FkJSwQScK1wlrv82t8zCjqFxmQnODQLrY-sy-2qwpCYOwAdNllKzB-'
+})
+
 
 var instance = new Razorpay({
   key_id: 'rzp_test_r82SUG9YhhYa4M',
@@ -672,7 +680,7 @@ if(cartProductTotalAmount[0].total==undefined){
 
       console.log(total)
       
-      let status = order["payment_method"] === "razorpay" ? "placed" : "pending";
+      let status = "placed";
 
 
       let orderObj = {
@@ -708,6 +716,21 @@ if(cartProductTotalAmount[0].total==undefined){
 
   },
 
+  //--------------------- get product by category-----------------
+
+ getProductByCategory:(id)=>{
+  return new  Promise(async(resolve,reject)=>{
+
+ let    products = await db.get().collection(collection.PRODUCT_COLLECTION).find({category_id:ObjectId(id)}).toArray()
+ resolve(products)
+ 
+  })
+
+ }
+  ,
+
+
+
   //---------------------razor Pay integration------------------
 
 generateRazorPay:(orderId,totalPrice)=>{
@@ -725,6 +748,7 @@ generateRazorPay:(orderId,totalPrice)=>{
   })
 
 },
+
 
 verifyPayment:(details)=>{
     return new Promise((resolve,reject)=>{
@@ -746,7 +770,91 @@ verifyPayment:(details)=>{
       }
     })
  
+},
+  //---------------------Paypal integration------------------
+
+generatePaypal:(total, products,order)=>{
+
+
+    console.log(total )
+
+  return new Promise(async(resolve, reject) => {
+
+    let create_payment_json = {
+        "intent": "sale",
+        "payer": {
+            "payment_method": "paypal"
+        },
+        "redirect_urls": {
+            "return_url": `http://localhost:3000/success/${order.userId}?paymentMethod=${order.payment_method}&phone=${order.phone}`,
+            "cancel_url": "http://localhost:3000/cart"
+        },
+        "transactions": [
+            {
+                "item_list": {
+                    "items": [
+                        {
+                            "name": "Red sok Hat",
+                            "sku": "001",
+                            "price": total,
+                            "currency": "USD",
+                            "quantity": 1
+                        }
+                    ]
+                },
+                "amount": {
+                    "currency": "USD",
+                    "total": total
+                },
+                "description": "This is the payment description."
+            }
+        ]
+    };
+
+    paypal.payment.create(create_payment_json, function (error, payment) {
+     if (error) {
+          throw error;
+        } else {
+    
+            payment.body=order
+            payment.products=products
+            payment.total=total
+           
+            console.log(payment)
+           resolve(payment)
+         
+           
+         }
+    });
+
+})
+
+},
+
+verifypaypal:(payerId,paymentId,total)=>{
+ return new Promise(async(resolve,reject)=>{
+  let execute_payment_json = {
+    "payer_id": payerId,
+    "transactions": [{
+        "amount": {
+            "currency": "USD",
+            "total":total, 
+        }
+    }]
+  };
+ 
+  paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
+    if (error) {
+        console.log(error.response);
+        throw error;
+    } else { 
+        console.log(JSON.stringify(payment));
+        resolve()
+    }
+});
+ })
 }
+
 ,
 
 

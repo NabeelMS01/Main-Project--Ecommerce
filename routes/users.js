@@ -8,6 +8,9 @@ const async = require("hbs/lib/async");
 const { route } = require("../app");
 const upload = require("../middlewere/multer");
 const client = require("twilio")(config.accountSID, config.authToken);
+
+
+
 var rn = require("random-number");
 var options = {
   min: 10000000,
@@ -263,7 +266,7 @@ router.get("/cart", verifyLogin, async (req, res) => {
   });
 });
 
-router.get("/add-to-cart/:id", async (req, res) => {
+router.get("/add-to-cart/:id", verifyLogin, async (req, res) => {
   let uid = req.params.id;
   let userid = req.session.user._id;
   let product = await adminHelper.getProductDetails(uid);
@@ -337,7 +340,8 @@ router.post("/place-order", verifyLogin, async (req, res) => {
   let orderId = rn(options);
   let products = await userHelper.getCartProducts(req.session.userData._id);
   let totalPrice = await userHelper.getTotalAmount(req.session.user._id);
-totalPrice= totalPrice*100
+req.session.totalPrice=totalPrice;
+let userData=await userHelper.getUserData(req.session.user._id)
   //   if(req.body.payment_method=="online"){
   //   console.log(products)
   //        console.log("online payment ")
@@ -348,20 +352,21 @@ totalPrice= totalPrice*100
 
   //else
   if (req.body.payment_method == "cod") {
+    totalPrice= totalPrice*100
     await userHelper
       .placeOrder(req.body, products, totalPrice)
       .then((orderId) => {
         res.json({ codsuccess: true });
       });
-  } else {
+  } else if(req.body.payment_method == "razorpay"){
+    totalPrice= totalPrice*100
     // await userHelper.placeOrderOnline(req.body, products, totalPrice).then(async(orderId) => {
     req.session.recieptId = orderId;
-let userData=await userHelper.getUserData(req.session.user._id)
+
     await userHelper
       .generateRazorPay(orderId, totalPrice)
       .then((paymentResponse) => {
 // console.log(userData);
-     
 
 
       res.json({ paymentResponse: paymentResponse,userData });
@@ -371,7 +376,37 @@ let userData=await userHelper.getUserData(req.session.user._id)
 
     // res.json({ status: true });
     // });
+  }else{
+  
+
+userHelper.generatePaypal(totalPrice,products, req.session.orderdata).then((response)=>{
+  response.paypal=true
+  res.json({response})
+})
+
+
   }
+});
+
+
+router.get('/success/:id',async (req, res) => {
+  let payerId = req.query.PayerID;
+  let paymentId = req.query.paymentId;
+  let total=req.session.totalPrice
+  let data=req.session.orderdata;
+
+  let products = await userHelper.getCartProducts(req.session.userData._id);
+
+ 
+  userHelper.verifypaypal(payerId,paymentId,total).then((response)=>{
+
+              
+        userHelper.placeOrderOnline(data, products, total).then((response)=>{
+      res.redirect('/orders')
+        })
+
+  })
+ 
 });
 
 router.post("/verify-payment", async(req, res) => {
@@ -489,13 +524,20 @@ router.post("/edit-profile", upload.array("proImage"), (req, res, next) => {
 
 //------------------------Shop products-----------------------------
 
-router.get("/shop-by-category/:id", verifyLogin, async (req, res) => {
+router.get("/shop-by-category/:id", async(req, res) => {
+
+let products = await userHelper.getProductByCategory(req.params.id)
+// let categoryname= await userHelper.getCategoryName(req.params.id)
+console.log(products)
+console.log("heres ")
   res.render("user/pages/shop", {
     userUi: true,
     category: req.session.category,
     cartCount: req.session.cartCount,
     logedIn: req.session.loggedIn,
     user: req.session.user,
+    products,
+    // categoryname
   });
 });
 

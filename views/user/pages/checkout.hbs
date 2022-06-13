@@ -103,6 +103,14 @@
                                     <span class="checkmark"></span>
                                 </label>
                             </div>
+                           <div class="checkout__input__checkbox">
+                                <label>
+                                    Paypal
+                                    <input name="payment_method" type="radio" value="paypal">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+
                             <input type="text" name="userId" id="" value="{{user._id}}" hidden>
                             <button onclick="return validation()" type="submit" class="site-btn">PLACE ORDER</button>
                         </div>
@@ -235,6 +243,12 @@
                 
                  razorpayPayment(response.paymentResponse,response.userData)
            
+            }else
+                 {
+              console.log(response)
+                
+                paypalPayment(response, response.body)
+           
             }
            
 
@@ -242,6 +256,18 @@
          }
     });
 });
+
+ function paypalPayment(data, body) {
+
+    console.log(data.response.links)
+    for (let i = 0; i < data.response.links.length; i++) {
+      if (data.response.links[i].rel === 'approval_url') {
+        // console.log(('approval_url'))
+        window.location.href = (data.response.links[i].href);
+        // let link=(data.links[i].href);
+      }
+    }
+  }
 
 function razorpayPayment(order,userData){
  

@@ -364,23 +364,65 @@
                         id="name" value="{{product.name}}" />
                     </div>
                   </div>
-                  <div class="row mb-3">
+
+
+
+                 <div class="row mb-3">
+
                     <label class="col-sm-2 col-form-label" for="basic-default-Category">Category</label>
                     <div class="col-sm-10">
                       <div class="mb-3">
                         <span class="text-danger" id="categorySpan"> </span>
-                        <input class="form-control" list="datalistOptions" id="category" onkeyup="return validCategory()"
-                          placeholder="Type to search..." name="category_name" value="{{product.category_name}}" />
+                        <select class="form-control" list="datalistOptions" id="category"
+                          onkeyup="return validCategory()" name="category_id" style="text-transform:capitalize" />
                         <datalist id="datalistOptions">
-                          <option value="T-shirt"></option>
-                          <option value="Hoodies"></option>
+                          {{#each category}}
+                          <option value="{{this._id}}"> {{this.category_name}} </option>
+                          {{/each}}
+
+                          {{!-- <option value="Hoodies"></option>
                           <option value="crop tops"></option>
                           <option value="skirts"></option>
-                          <option value="pants"></option>
+                          <option value="pants"></option> --}}
                         </datalist>
+                        </select>
                       </div>
                     </div>
                   </div>
+
+
+ <div class="row mb-3">
+
+                    <label class="col-sm-2 col-form-label" for="basic-default-Category">Sub-Category</label>
+                    <div class="col-sm-10">
+                      <div class="mb-3">
+                        <span class="text-danger" id="subCategorySpan"> </span>
+                        <select class="form-control" list="datalistOptions" id="subCategory"
+                          onkeyup="return validSubCategory()" name="sub_category_id" style="text-transform:capitalize" />
+                        <datalist id="datalistOptions">
+                      <option value=null > Select </option>
+                          {{#each subcategory}}
+                         
+                          <option value="{{this._id}}"> {{this.sub_category}} </option>
+                          {{/each}}
+
+                          {{!-- <option value="Hoodies"></option>
+                          <option value="crop tops"></option>
+                          <option value="skirts"></option>
+                          <option value="pants"></option> --}}
+                        </datalist>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+
+
+
+
+
+
+
                   <span class="text-danger" id="mrpSpan"> </span>
                   <div class="row mb-3">
                     <label class="col-sm-2 col-form-label" for="basic-default-name">MRP</label>

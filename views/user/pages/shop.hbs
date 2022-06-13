@@ -45,15 +45,15 @@
                                         <div class="card-body">
                                             <div class="shop__sidebar__categories">
                                                 <ul class="nice-scroll">
-                                                    <li><a href="#">Men (20)</a></li>
-                                                    <li><a href="#">Women (20)</a></li>
-                                                    <li><a href="#">Bags (20)</a></li>
-                                                    <li><a href="#">Clothing (20)</a></li>
-                                                    <li><a href="#">Shoes (20)</a></li>
-                                                    <li><a href="#">Accessories (20)</a></li>
-                                                    <li><a href="#">Kids (20)</a></li>
-                                                    <li><a href="#">Kids (20)</a></li>
-                                                    <li><a href="#">Kids (20)</a></li>
+
+                                                       {{#each category}}
+                                                    <li><a href="#">{{this.category_name}} </a></li>
+                                                  {{/each}}
+                                             
+
+
+
+                                                 
                                                 </ul>
                                             </div>
                                         </div>
@@ -211,44 +211,57 @@
                         </div>
                     </div>
                     <div class="row">
-                       
-                        <div class="col-lg-4 col-md-6 col-sm-6">
-                            <div class="product__item">
-                                <div class="product__item__pic set-bg" data-setbg="/img/product/product-4.jpg">
-                                    <ul class="product__hover">
-                                        <li><a href="#"><img src="/img/icon/heart.png" alt=""></a></li>
-                                        <li><a href="#"><img src="/img/icon/compare.png" alt=""> <span>Compare</span></a>
-                                        </li>
-                                        <li><a href="#"><img src="/img/icon/search.png" alt=""></a></li>
-                                    </ul>
-                                </div>
-                                <div class="product__item__text">
-                                    <h6>Diagonal Textured Cap</h6>
-                                    <a href="#" class="add-cart">+ Add To Cart</a>
-                                    <div class="rating">
-                                        <i class="fa fa-star-o"></i>
-                                        <i class="fa fa-star-o"></i>
-                                        <i class="fa fa-star-o"></i>
-                                        <i class="fa fa-star-o"></i>
-                                        <i class="fa fa-star-o"></i>
-                                    </div>
-                                    <h5>₹60.9</h5>
-                                    <div class="product__color__select">
-                                        <label for="pc-10">
-                                            <input type="radio" id="pc-10">
-                                        </label>
-                                        <label class="active black" for="pc-11">
-                                            <input type="radio" id="pc-11">
-                                        </label>
-                                        <label class="grey" for="pc-12">
-                                            <input type="radio" id="pc-12">
-                                        </label>
-                                    </div>
-                                </div>
+                         {{#each products}}
+            <div class="col-lg-3 col-md-6 col-sm-6 col-md-6 col-sm-6 mix new-arrivals">
+
+                <div class="product__item">
+                    <div onclick="location.href='/product-details/{{this._id}}';" class="product__item__pic set-bg"
+                        data-setbg="/uploads/{{this.images.[0]}}" >
+                        <span style="background-color: darkorange;" class="label" >New</span>
+                        <ul class="product__hover">
+                            {{!-- <li><a href="#"><img src="/img/icon/heart.png" alt=""></a></li>
+                            <li><a href="#"><img src="/img/icon/compare.png" alt=""> <span>Compare</span></a></li>
+                            <li><a href="#"><img src="/img/icon/search.png" alt=""></a></li> --}}
+                        </ul>
+                    </div>
+
+
+                    <div class="product__item__text">
+                        <h6>{{this.name}}</h6>
+                        <a style="cursor: pointer;" class="add-cart">
+                             <button style="border:none ;color: rgb(255, 0, 0); background-color:rgba(0, 0, 0, 0);" onclick="addToCart('{{this._id}}')"  > + Add To Cart  </button>   </a> 
+
+                            <div class="rating">
+                                <i class="fa fa-star-o"></i>
+                                <i class="fa fa-star-o"></i>
+                                <i class="fa fa-star-o"></i>
+                                <i class="fa fa-star-o"></i>
+                                <i class="fa fa-star-o"></i>
                             </div>
-                        </div>
-                        
-                        
+                    <h5> ₹{{this.price}}</h5>
+                    <div class="product__color__select">
+                        <label for="pc-1">
+                            <input type="radio" id="pc-1">
+                        </label>
+                        <label class="active black" for="pc-2">
+                            <input type="radio" id="pc-2">
+                        </label>
+                        <label class="grey" for="pc-3">
+                            <input type="radio" id="pc-3">
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+
+
+
+        </div>
+        {{/each}}
+
+    
+
+
                         
                       
                     </div>

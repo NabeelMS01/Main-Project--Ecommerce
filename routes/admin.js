@@ -17,7 +17,7 @@ const varifyLogin = (req, res, next) => {
   if (req.session.admin) {
     next();
   } else {
-    res.redirect("/login");
+    res.redirect("/admin/login");
   }
 };
 
@@ -84,6 +84,19 @@ router.get("/all-orders",varifyLogin, async (req, res) => {
     orders,
   });
 });
+
+router.get("/order-details/:id",varifyLogin, async (req, res) => {
+  let order = await adminHelper.getOrderDetails(req.params.id);
+
+
+  console.log(order);
+  res.render("admin/pages/orderManagement/order-details", {
+    admin: true,
+    order,
+  });
+});
+
+
 
 // ----------------User Management----------------
 
@@ -165,14 +178,7 @@ router.post("/add-product", upload.array("multiImages"), (req, res, next) => {
     arr.push(req.files[index].filename);
   });
 
-  // const files =req.files
-  // res.send(files)
-  // if(!files){
-  //     const error =new Error('please choose files');
 
-  //     error.httpStatusCode =400  ;
-  //     return next(error)
-  // }
 
   adminHelper.addProduct(req.body, arr).then((data) => {
     req.session.submit= true
@@ -184,7 +190,7 @@ router.post("/add-product", upload.array("multiImages"), (req, res, next) => {
 
 // ----------------view - product ----------------
 
-router.get("/view-product/:id",varifyLogin, (req, res) => {
+router.get("/view-product/:id",varifyLogin, (req, res) => { 
   var id = req.params.id;
 
 adminHelper.getProductDetails(id).then((product)=>{
@@ -201,11 +207,13 @@ adminHelper.getProductDetails(id).then((product)=>{
 
 // ----------------edit - product ----------------
 
-router.get("/edit-product/:id", (req, res) => {
+router.get("/edit-product/:id", async(req, res) => {
   //   var id= req.params.id
 
   //   adminHelper.editProduct(id).then(
 
+    let category= await adminHelper.getAllCategory()
+    let subcategory= await adminHelper.getAllSubcategory()
   //   )
   var id = req.params.id;
 
@@ -215,7 +223,8 @@ router.get("/edit-product/:id", (req, res) => {
     res.render("admin/pages/productManagement/edit-product.hbs", {
       admin: true,
       product,
-    
+      category,
+      subcategory
     });
 
     req.session.submit=false
