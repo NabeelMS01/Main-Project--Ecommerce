@@ -48,7 +48,13 @@
                                         style="border: none  ;background-color: rgba(0, 0, 0, 0); font-size: 20px;"
                                         onclick='changeQuantity("{{this._id}}","{{this.product._id}}","{{../user._id}}", 1 )'>+</button>
                                 </td>
-                                <td class="cart__price">₹ {{this.product.price}}</span></td>
+                                        {{#if this.product.offer_status}} 
+                                <td class="cart__price">      ₹ {{this.product.offer_price}}       </td>
+                                     {{else}}
+                   <td class="cart__price">      ₹ {{this.product.price}}       </td>
+                                     {{/if}}
+
+
                                 <td class="cart__close"><i onclick='removeCartProduct( "{{this._id}}","{{this.product._id}}" )' class="fa fa-close"></i></td>
                             </tr>
                             {{/each}}

@@ -26,7 +26,7 @@
     rel="stylesheet">
 
     {{!-- ------------------sweet alert --------------------------- --}}
-<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
 
 {{!-- ----------------------profile bootstrap cdn--------------------------- --}}
 <!-- CSS only -->
@@ -34,10 +34,15 @@
     <!-- Css Styles -->
  
 {{#if admin}}
-<!-- Fonts -->
-<script src="/assets/js/jquery-3.3.1.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css">
+
+{{!-- <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js" ></script> --}}
+
+<!-- Adding jQuery --> <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js" ></script> <!-- Adding DataTables CSS and JS --> <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.20/css/jquery.dataTables.css"> <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.js"></script>
+
+
+
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -85,6 +90,7 @@ default theme options, Set your preferred theme option in this file.
 
 
 {{else}}
+<script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
 {{!-- User template --}}
     <link rel="stylesheet" href="/assets/css/bootstrap.min.css" type="text/css">
     <link rel="stylesheet" href="/assets/css/font-awesome.min.css" type="text/css">

@@ -7,21 +7,23 @@ const { response } = require("../app");
 const { Db } = require("mongodb");
 const moment = require("moment");
 const ObjectId = require("mongodb").ObjectId;
-const Razorpay = require('razorpay');
+const Razorpay = require("razorpay");
 const { resolve } = require("node:path");
 const { Hmac } = require("node:crypto");
-const paypal = require('paypal-rest-sdk');
+const paypal = require("paypal-rest-sdk");
 const { Console } = require("node:console");
+const adminHelper = require("./adminHelper");
 paypal.configure({
-  'mode': 'sandbox', //sandbox or live
-  'client_id': 'AXsoo5XqDTfQZQmjBTZTgM0npkYzCs6H90HKxMBZlhZJVceZsMHE5bEeRLPZFA2L13m7sfgbgdS3A-CT',
-  'client_secret': 'EBTeRIdqDmSixD6uWGmuDwFbM9FkJSwQScK1wlrv82t8zCjqFxmQnODQLrY-sy-2qwpCYOwAdNllKzB-'
-})
-
+  mode: "sandbox", //sandbox or live
+  client_id:
+    "AXsoo5XqDTfQZQmjBTZTgM0npkYzCs6H90HKxMBZlhZJVceZsMHE5bEeRLPZFA2L13m7sfgbgdS3A-CT",
+  client_secret:
+    "EBTeRIdqDmSixD6uWGmuDwFbM9FkJSwQScK1wlrv82t8zCjqFxmQnODQLrY-sy-2qwpCYOwAdNllKzB-",
+});
 
 var instance = new Razorpay({
-  key_id: 'rzp_test_r82SUG9YhhYa4M',
- key_secret: '3J69cSPac1Du7CjKKH9k8lKL',
+  key_id: "rzp_test_r82SUG9YhhYa4M",
+  key_secret: "3J69cSPac1Du7CjKKH9k8lKL",
 });
 
 module.exports = {
@@ -105,58 +107,52 @@ module.exports = {
       }
     });
   },
-  doPasswordCheck:(userData,bodyData)=>{
-return new Promise(async(resolve,reject)=>{
-  console.log(bodyData.oldPassword);
-   console.log("0------------00000");
+  doPasswordCheck: (userData, bodyData) => {
+    return new Promise(async (resolve, reject) => {
+      console.log(bodyData.oldPassword);
+      console.log("0------------00000");
 
- await bcrypt.compare(bodyData.old_password, userData.password ).then((status) => {
-   console.log(status);
-   console.log("0000000000000");
-  let response={}
-   
-    if (status) {
-    
-      response.status = true;
-      resolve(response);
-      console.log("Login succesful");
-    } else {
-      resolve({ status: false });
-      console.log("Login failed");
-    }
-  })
+      await bcrypt
+        .compare(bodyData.old_password, userData.password)
+        .then((status) => {
+          console.log(status);
+          console.log("0000000000000");
+          let response = {};
 
-
-
-
-})
-
-
+          if (status) {
+            response.status = true;
+            resolve(response);
+            console.log("Login succesful");
+          } else {
+            resolve({ status: false });
+            console.log("Login failed");
+          }
+        });
+    });
   },
-  changePassword:(userData,dataBody)=>{
-  return new Promise(async(resolve,reject)=>{
-    console.log("++++++++++++++++++++++++");
-    console.log(dataBody);
-    console.log("++++++++++++++++++++++++");
+  changePassword: (userData, dataBody) => {
+    return new Promise(async (resolve, reject) => {
+      console.log("++++++++++++++++++++++++");
+      console.log(dataBody);
+      console.log("++++++++++++++++++++++++");
 
-  let password = await bcrypt.hash(dataBody.password,10)
+      let password = await bcrypt.hash(dataBody.password, 10);
 
-  await db.get().collection(collection.USER_COLLECTION).updateOne({_id:ObjectId(userData._id)},{
-    $set:{
-       password:password
-    }
-  },{upsert:true}).then(
-    resolve({status:true})
-  )
-
-
-  })
-
-
-
-  }
-  
-  ,
+      await db
+        .get()
+        .collection(collection.USER_COLLECTION)
+        .updateOne(
+          { _id: ObjectId(userData._id) },
+          {
+            $set: {
+              password: password,
+            },
+          },
+          { upsert: true }
+        )
+        .then(resolve({ status: true }));
+    });
+  },
 
   getPhone: (email) => {
     return new Promise((resolve, reject) => {
@@ -269,9 +265,8 @@ return new Promise(async(resolve,reject)=>{
           {
             upsert: true,
           }
-        ).then(
-          resolve()
-        );
+        )
+        .then(resolve());
     });
   },
 
@@ -406,7 +401,6 @@ return new Promise(async(resolve,reject)=>{
         ])
         .toArray();
 
-
       resolve(cartItems);
     });
   },
@@ -508,26 +502,21 @@ return new Promise(async(resolve,reject)=>{
           // }
         ])
         .toArray();
-if(cartProductTotalAmount[0].total==undefined){
-  resolve({status:true})
-}else{
-  console.log(cartProductTotalAmount);
+      if (cartProductTotalAmount[0].total == undefined) {
+        resolve({ status: true });
+      } else {
+        console.log(cartProductTotalAmount);
 
         console.log("************asdasdfasdf*****");
         console.log(cartProductTotalAmount[0].total);
-  
+
         resolve(cartProductTotalAmount[0].total);
-}
-      
-
-
-        
-     
+      }
     });
   },
   getTotalAmount: (userId) => {
     return new Promise(async (resolve, reject) => {
-  let cartTotalAmount=     await db
+      let cartTotalAmount = await db
         .get()
         .collection(collection.CART_COLLECTION)
         .aggregate([
@@ -561,28 +550,43 @@ if(cartProductTotalAmount[0].total==undefined){
           {
             $group: {
               _id: null,
-              total: { $sum: { $multiply: ["$quantity", "$product.price"] } },
+              total: {
+                $sum: {
+                  $cond: {
+                    if: { $eq: ["$product.offer_status", true] },
+                    then: { $multiply: ["$quantity", "$product.offer_price"] },
+                    else: { $multiply: ["$quantity", "$product.price"] },
+                  },
+
+                  // $multiply: ["$quantity", "$product.price"]
+                },
+              },
             },
           },
         ])
-        .toArray()
-     
- console.log(cartTotalAmount[0]);
+        .toArray();
 
-          if(cartTotalAmount[0]===undefined){
-            resolve()
-          }else{
-            resolve( cartTotalAmount[0].total)
-          }
-    
+      console.log(cartTotalAmount[0]);
 
-        });
+      if (cartTotalAmount[0] === undefined) {
+        resolve();
+      } else {
+        resolve(cartTotalAmount[0].total);
+      }
+    });
 
-      // console.log("************asdasdfasdf*****");
-      // console.log(cartTotalAmount[0].total);
+    // console.log("************asdasdfasdf*****");
+    // console.log(cartTotalAmount[0].total);
+  },
 
-     
-
+  getOrderDetails: (id) => {
+    return new Promise(async (resolve, reject) => {
+      let orderDetails = await db
+        .get()
+        .collection(collection.ORDER_COLLECTION)
+        .findOne({ _id: ObjectId(id) });
+      resolve(orderDetails);
+    });
   },
 
   //*****************************get  CArt product TOtal ------------------- */
@@ -639,9 +643,7 @@ if(cartProductTotalAmount[0].total==undefined){
   // ------------------place order--------------------
   placeOrder: (order, products, total) => {
     return new Promise(async (resolve, reject) => {
-      
       let status = order["payment_method"] === "cod" ? "placed" : "pending";
-
 
       let orderObj = {
         deliveryDetails: {
@@ -654,10 +656,11 @@ if(cartProductTotalAmount[0].total==undefined){
         userId: ObjectId(order.userId),
         paymentMethod: order["payment_method"],
         products: products,
-        totalAmount: total,
-        date: moment().format("L"),
-        time: moment().format(),
+        totalAmount: total / 100,
+        date: moment().local().format("DD-MM-YYYY"),
+        order_time: new Date(),
         status: status,
+        delivery_status: false,
       };
 
       db.get()
@@ -667,21 +670,17 @@ if(cartProductTotalAmount[0].total==undefined){
           db.get()
             .collection(collection.CART_COLLECTION)
             .deleteOne({ user: ObjectId(order.userId) });
-            console.log('333333333333333333333333333');
+          console.log("333333333333333333333333333");
           console.log(response.insertedId.toString());
-          resolve( response.insertedId.toString());
+          resolve(response.insertedId.toString());
         });
     });
-
-
   },
   placeOrderOnline: (order, products, total) => {
     return new Promise(async (resolve, reject) => {
+      console.log(total);
 
-      console.log(total)
-      
       let status = "placed";
-
 
       let orderObj = {
         deliveryDetails: {
@@ -695,9 +694,10 @@ if(cartProductTotalAmount[0].total==undefined){
         paymentMethod: order["payment_method"],
         products: products,
         totalAmount: total,
-        date: moment().format("L"),
-        time: moment().format(),
+        date: moment().local().format("DD-MM-YYYY"),
+        order_time: new Date(),
         status: status,
+        delivery_status: false,
       };
 
       db.get()
@@ -707,158 +707,148 @@ if(cartProductTotalAmount[0].total==undefined){
           db.get()
             .collection(collection.CART_COLLECTION)
             .deleteOne({ user: ObjectId(order.userId) });
-            console.log('333333333333333333333333333');
+          console.log("333333333333333333333333333");
           console.log(response.insertedId.toString());
-          resolve( response.insertedId.toString());
+          resolve(response.insertedId.toString());
         });
     });
-
-
   },
 
   //--------------------- get product by category-----------------
 
- getProductByCategory:(id)=>{
-  return new  Promise(async(resolve,reject)=>{
-
- let    products = await db.get().collection(collection.PRODUCT_COLLECTION).find({category_id:ObjectId(id)}).toArray()
- resolve(products)
- 
-  })
-
- }
-  ,
-
-
-
+  getProductByCategory: (name) => {
+    return new Promise(async (resolve, reject) => {
+      let products = await db
+        .get()
+        .collection(collection.PRODUCT_COLLECTION)
+        .find({ category_name: `${name}` })
+        .toArray();
+      console.log(products);
+      resolve(products);
+    });
+  },
   //---------------------razor Pay integration------------------
 
-generateRazorPay:(orderId,totalPrice)=>{
-  return new Promise((resolve,rject)=>{
-    var options = {
-      amount: totalPrice,  // amount in the smallest currency unit
-      currency: "INR",
-      receipt: orderId
-    };
-    instance.orders.create(options, function(err, order) {
-      console.log("new order"); 
-      // console.log(order);
-      resolve(order)
+  generateRazorPay: (orderId, totalPrice) => {
+    return new Promise((resolve, rject) => {
+      var options = {
+        amount: totalPrice, // amount in the smallest currency unit
+        currency: "INR",
+        receipt: orderId,
+      };
+      instance.orders.create(options, function (err, order) {
+        console.log("new order");
+        // console.log(order);
+        resolve(order);
+      });
     });
-  })
+  },
 
-},
+  verifyPayment: (details) => {
+    return new Promise((resolve, reject) => {
+      let crypto = require("node:crypto");
 
+      let hash = crypto
+        .createHmac("sha256", "3J69cSPac1Du7CjKKH9k8lKL")
+        .update(
+          details.payment.razorpay_order_id +
+            "|" +
+            details.payment.razorpay_payment_id
+        )
+        .digest("hex");
 
-verifyPayment:(details)=>{
-    return new Promise((resolve,reject)=>{
-      let crypto = require('node:crypto');
-  
-      let hash = crypto.createHmac('sha256', '3J69cSPac1Du7CjKKH9k8lKL')
-      .update(details.payment.razorpay_order_id+'|'+details.payment.razorpay_payment_id)
-      .digest('hex');
-   
-   
-      if(hash==details.payment.razorpay_signature){
-   
-       console.log(hash)
-   
-        console.log("666666666666666")
-        resolve() 
-      }else{
-       reject()
+      if (hash == details.payment.razorpay_signature) {
+        console.log(hash);
+
+        console.log("666666666666666");
+        resolve();
+      } else {
+        reject();
       }
-    })
- 
-},
+    });
+  },
   //---------------------Paypal integration------------------
 
-generatePaypal:(total, products,order)=>{
+  generatePaypal: (total, products, order) => {
+    console.log(total);
 
-
-    console.log(total )
-
-  return new Promise(async(resolve, reject) => {
-
-    let create_payment_json = {
-        "intent": "sale",
-        "payer": {
-            "payment_method": "paypal"
+    return new Promise(async (resolve, reject) => {
+      let create_payment_json = {
+        intent: "sale",
+        payer: {
+          payment_method: "paypal",
         },
-        "redirect_urls": {
-            "return_url": `http://localhost:3000/success/${order.userId}?paymentMethod=${order.payment_method}&phone=${order.phone}`,
-            "cancel_url": "http://localhost:3000/cart"
+        redirect_urls: {
+          return_url: `http://localhost:3000/success/${order.userId}?paymentMethod=${order.payment_method}&phone=${order.phone}`,
+          cancel_url: "http://localhost:3000/cart",
         },
-        "transactions": [
-            {
-                "item_list": {
-                    "items": [
-                        {
-                            "name": "Red sok Hat",
-                            "sku": "001",
-                            "price": total,
-                            "currency": "USD",
-                            "quantity": 1
-                        }
-                    ]
+        transactions: [
+          {
+            item_list: {
+              items: [
+                {
+                  name: "Red sok Hat",
+                  sku: "001",
+                  price: total,
+                  currency: "USD",
+                  quantity: 1,
                 },
-                "amount": {
-                    "currency": "USD",
-                    "total": total
-                },
-                "description": "This is the payment description."
-            }
-        ]
-    };
+              ],
+            },
+            amount: {
+              currency: "USD",
+              total: total,
+            },
+            description: "This is the payment description.",
+          },
+        ],
+      };
 
-    paypal.payment.create(create_payment_json, function (error, payment) {
-     if (error) {
+      paypal.payment.create(create_payment_json, function (error, payment) {
+        if (error) {
           throw error;
         } else {
-    
-            payment.body=order
-            payment.products=products
-            payment.total=total
-           
-            console.log(payment)
-           resolve(payment)
-         
-           
-         }
-    });
+          payment.body = order;
+          payment.products = products;
+          payment.total = total;
 
-})
-
-},
-
-verifypaypal:(payerId,paymentId,total)=>{
- return new Promise(async(resolve,reject)=>{
-  let execute_payment_json = {
-    "payer_id": payerId,
-    "transactions": [{
-        "amount": {
-            "currency": "USD",
-            "total":total, 
+          console.log(payment);
+          resolve(payment);
         }
-    }]
-  };
- 
-  paypal.payment.execute(paymentId, execute_payment_json, function (error, payment) {
-    if (error) {
-        console.log(error.response);
-        throw error;
-    } else { 
-        console.log(JSON.stringify(payment));
-        resolve()
-    }
-});
- })
-}
+      });
+    });
+  },
 
-,
+  verifypaypal: (payerId, paymentId, total) => {
+    return new Promise(async (resolve, reject) => {
+      let execute_payment_json = {
+        payer_id: payerId,
+        transactions: [
+          {
+            amount: {
+              currency: "USD",
+              total: total,
+            },
+          },
+        ],
+      };
 
+      paypal.payment.execute(
+        paymentId,
+        execute_payment_json,
+        function (error, payment) {
+          if (error) {
+            console.log(error.response);
+            throw error;
+          } else {
+            console.log(JSON.stringify(payment));
+            resolve();
+          }
+        }
+      );
+    });
+  },
 
-  
   getCartProductList: (userId) => {
     return new Promise(async (resolve, reject) => {
       let products = await db
@@ -898,6 +888,26 @@ verifypaypal:(payerId,paymentId,total)=>{
         .then(resolve());
     });
   },
+
+  returnOrder: (orderId) => {
+    return new Promise(async (resolve, reject) => {
+      await db
+        .get()
+        .collection(collection.ORDER_COLLECTION)
+        .updateOne(
+          { _id: ObjectId(orderId) },
+          {
+            $set: {
+              status: "returned",
+            },
+          }
+        )
+        .then(resolve());
+    });
+  },
+
+
+  
   shipOrder: (orderId) => {
     return new Promise(async (resolve, reject) => {
       await db
@@ -912,6 +922,39 @@ verifypaypal:(payerId,paymentId,total)=>{
           }
         )
         .then(resolve());
+    });
+  },
+
+  validateOffer: () => {
+    return new Promise(async (resolve, reject) => {
+      let products = await db
+        .get()
+        .collection(collection.PRODUCT_COLLECTION)
+        .find()
+        .toArray();
+      let i;
+
+      console.log(products);
+
+      for (i = 0; i < products.length; i++) {
+        if (products[i].offer_status) {
+       let nowDate = new Date().toISOString().split("T")[0];
+       let endDate =products[i].offer_end.toISOString().split("T")[0]
+          nowDate=new Date(nowDate)
+          endDate=new Date(endDate)
+//  console.log(nowDate);
+//  console.log(endDate);
+          if (nowDate>=endDate ) {
+           
+          adminHelper.removeProductOffer(products[i]._id);
+            console.log("delete Success ******************");
+          }
+
+          
+        }
+      }
+
+      resolve();
     });
   },
 };

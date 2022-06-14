@@ -61,7 +61,11 @@
                 <div class="product__item">
                     <div onclick="location.href='/product-details/{{this._id}}';" class="product__item__pic set-bg"
                         data-setbg="uploads/{{this.images.[0]}}" >
-                        <span style="background-color: darkorange;" class="label" >New</span>
+                        {{#if this.offer}}
+                        <span style="background-color: darkorange;" class="label" >{{this.offer}}% OFF</span>
+                         {{!-- {{else}} --}}
+
+                  {{/if}}
                         <ul class="product__hover">
                             {{!-- <li><a href="#"><img src="/img/icon/heart.png" alt=""></a></li>
                             <li><a href="#"><img src="/img/icon/compare.png" alt=""> <span>Compare</span></a></li>
@@ -82,19 +86,30 @@
                                 <i class="fa fa-star-o"></i>
                                 <i class="fa fa-star-o"></i>
                             </div>
-                    <h5> ₹{{this.price}}</h5>
-                    <div class="product__color__select">
-                        <label for="pc-1">
-                            <input type="radio" id="pc-1">
-                        </label>
-                        <label class="active black" for="pc-2">
-                            <input type="radio" id="pc-2">
-                        </label>
-                        <label class="grey" for="pc-3">
-                            <input type="radio" id="pc-3">
-                        </label>
-                    </div>
-                </div>
+
+                   {{#if this.offer_status}}
+                  <div class="row">
+                   <div class="col" >
+         <h5 style="text-decoration: line-through;" > ₹{{this.price}}</h5>
+                   </div>
+                      
+                 <div class="col" >
+                      <h5> ₹{{this.offer_price}}</h5> 
+                   </div>
+           </div>
+       {{else}}
+       <div class="row">
+                   <div class="col" >
+         <h5> ₹{{this.price}}</h5>
+                   </div>
+                      
+                 
+           </div>
+
+{{/if}}
+
+
+                  </div>
             </div>
 
 

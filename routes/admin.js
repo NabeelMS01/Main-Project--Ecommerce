@@ -8,6 +8,7 @@ const controller = require("../controller/controller");
 const upload = require("../middlewere/multer");
 const async = require("hbs/lib/async");
 const { Db } = require("mongodb");
+const userHelper = require("../helpers/userHelper");
 
 let admin = {
   email: "admin@gmail.com",
@@ -23,11 +24,30 @@ const varifyLogin = (req, res, next) => {
 
 // -----------------Getting admin home page------------------
 
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
   if (!req.session.admin) {
     res.redirect("/admin/login");
   } else {
-    res.render("admin/pages/home-admin", { admin: true });
+    let orderByday = await adminHelper.getSalesDay();
+    let totalRevenue = await adminHelper.getTotalRevenue();
+    let totalOrders = await adminHelper.getAllOrders();
+
+    console.log(orderByday[0]._id.day);
+    let cardSale = await adminHelper.getCardSale();
+    let paypal = await adminHelper.getPaypalSale();
+    let codSale = await adminHelper.getCodSale();
+    totalOrders = totalOrders.length;
+    //  console.log(cardSale );
+
+    res.render("admin/pages/home-admin", {
+      admin: true,
+      totalRevenue,
+      totalOrders,
+      orderByday,
+      cardSale,
+      paypal,
+      codSale,
+    });
   }
 
   // res.render('admin/login',{admin:true})
@@ -74,9 +94,8 @@ router.post("/login", (req, res) => {
 
 // ----------------Order Management----------------
 
-router.get("/all-orders",varifyLogin, async (req, res) => {
+router.get("/all-orders", varifyLogin, async (req, res) => {
   let orders = await adminHelper.getAllOrders();
-
 
   console.log(orders);
   res.render("admin/pages/orderManagement/orders-admin", {
@@ -85,9 +104,8 @@ router.get("/all-orders",varifyLogin, async (req, res) => {
   });
 });
 
-router.get("/order-details/:id",varifyLogin, async (req, res) => {
+router.get("/order-details/:id", varifyLogin, async (req, res) => {
   let order = await adminHelper.getOrderDetails(req.params.id);
-
 
   console.log(order);
   res.render("admin/pages/orderManagement/order-details", {
@@ -96,11 +114,9 @@ router.get("/order-details/:id",varifyLogin, async (req, res) => {
   });
 });
 
-
-
 // ----------------User Management----------------
 
-router.get("/all-users",varifyLogin, (req, res) => {
+router.get("/all-users", varifyLogin, (req, res) => {
   adminHelper.getAllUser().then((users) => {
     res.render("admin/pages/userManagement/all-users", {
       admin: true,
@@ -113,60 +129,50 @@ router.get("/all-users",varifyLogin, (req, res) => {
 router.get("/block-user/:id", (req, res) => {
   userId = req.params.id;
   adminHelper.blockUser(userId).then((response) => {
-
     res.json({ status: true });
-  
   });
 });
 
 router.get("/unblock-user/:id", (req, res) => {
-
-
-
-
   userId = req.params.id;
 
   adminHelper.unBlockUser(userId).then((response) => {
     res.json({ status: true });
-
   });
 });
 
 // ----------------Product Management----------------
 
 // ----------------All product----------------
-router.get("/all-products",varifyLogin, (req, res) => {
+router.get("/all-products", varifyLogin, (req, res) => {
   adminHelper.getAllProduct().then((products) => {
     res.render("admin/pages/productManagement/all-products", {
       admin: true,
       products,
- 
+
       submit: req.session.submit,
     });
-    req.session.submit=false;
+    req.session.submit = false;
     req.flash("message", null);
   });
 });
 
 // ----------------Add product----------------
-router.get("/add-product",varifyLogin,async (req, res) => {
+router.get("/add-product", varifyLogin, async (req, res) => {
+  let category = await adminHelper.getAllCategory();
+  let subcategory = await adminHelper.getAllSubcategory();
 
-  let category= await adminHelper.getAllCategory()
-  let subcategory= await adminHelper.getAllSubcategory()
+  res.render("admin/pages/productManagement/add-product", {
+    admin: true,
+    submit: req.session.submit,
+    category,
+    subcategory,
+  });
 
-
-  res.render("admin/pages/productManagement/add-product", { admin: true,submit:req.session.submit,category,subcategory })
-
-
-    req.session.submit=false
-
- 
-
-
+  req.session.submit = false;
 });
 
 router.post("/add-product", upload.array("multiImages"), (req, res, next) => {
- 
   console.log("ivide***********************");
   console.log(req.file);
   console.log(req.body);
@@ -178,42 +184,35 @@ router.post("/add-product", upload.array("multiImages"), (req, res, next) => {
     arr.push(req.files[index].filename);
   });
 
-
-
   adminHelper.addProduct(req.body, arr).then((data) => {
-    req.session.submit= true
-     res.redirect("/admin/add-product");
-
-
+    req.session.submit = true;
+    res.redirect("/admin/add-product");
   });
 });
 
 // ----------------view - product ----------------
 
-router.get("/view-product/:id",varifyLogin, (req, res) => { 
+router.get("/view-product/:id", varifyLogin, (req, res) => {
   var id = req.params.id;
 
-adminHelper.getProductDetails(id).then((product)=>{
-  res.render("admin/pages/productManagement/view-product.hbs", {
-    admin: true,
-    toast: req.flash("message"),
-    product,
+  adminHelper.getProductDetails(id).then((product) => {
+    res.render("admin/pages/productManagement/view-product.hbs", {
+      admin: true,
+      toast: req.flash("message"),
+      product,
+    });
   });
-
-});
-
-
 });
 
 // ----------------edit - product ----------------
 
-router.get("/edit-product/:id", async(req, res) => {
+router.get("/edit-product/:id", async (req, res) => {
   //   var id= req.params.id
 
   //   adminHelper.editProduct(id).then(
 
-    let category= await adminHelper.getAllCategory()
-    let subcategory= await adminHelper.getAllSubcategory()
+  let category = await adminHelper.getAllCategory();
+  let subcategory = await adminHelper.getAllSubcategory();
   //   )
   var id = req.params.id;
 
@@ -224,11 +223,10 @@ router.get("/edit-product/:id", async(req, res) => {
       admin: true,
       product,
       category,
-      subcategory
+      subcategory,
     });
 
-    req.session.submit=false
-
+    req.session.submit = false;
   });
 });
 
@@ -249,7 +247,7 @@ router.post("/edit-product/:id", upload.array("multiImages"), (req, res) => {
   adminHelper
     .updateProduct(id, req.body, arr)
     .then(
-      req.session.submit="your edit is succesfull",
+      (req.session.submit = "your edit is succesfull"),
       res.redirect("/admin/all-products")
     );
 });
@@ -278,24 +276,26 @@ router.get("/activate-product/:id", (req, res) => {
 // ----------------Category Management----------------
 
 router.get("/view-category", (req, res) => {
-  adminHelper.getAllCategory().then(async(categories) => {
-    let subCategory=await adminHelper.getAllSubcategory()
-    console.log(subCategory );
-    console.log("//////////////////88888888888888" );
+  adminHelper.getAllCategory().then(async (categories) => {
+    let subCategory = await adminHelper.getAllSubcategory();
+    console.log(subCategory);
+    console.log("//////////////////88888888888888");
     res.render("admin/pages/categoryManagement/view-category", {
       admin: true,
       categories,
-      subCategory
+      subCategory,
     });
   });
 });
 //---------------add-category------------------------
 
-router.get("/add-category", async(req, res) => {
-  let category= await adminHelper.getAllCategory()
+router.get("/add-category", async (req, res) => {
+  let category = await adminHelper.getAllCategory();
 
-
-  res.render("admin/pages/categoryManagement/add-category", { admin: true ,category});
+  res.render("admin/pages/categoryManagement/add-category", {
+    admin: true,
+    category,
+  });
 });
 
 router.post("/add-category", (req, res) => {
@@ -310,31 +310,13 @@ router.post("/add-subcategory", (req, res) => {
   });
 });
 
-
-
-
-
-
 //---------------edit-category------------------------
-router.get("/edit-subCategory/:id", async(req, res) => {
+router.get("/edit-subCategory/:id", async (req, res) => {
   console.log("******************");
   console.log(req.params.id);
   console.log("******************");
 
-let subCategory= await adminHelper.getSubCategory(req.params.id)
-
-  res.render("admin/pages/categoryManagement/edit-subCategory",{
-    admin: true,
-    subCategory,
-  });
-});
-
-router.post("/edit-subCategory/:id", async(req, res) => {
-  console.log("******************");
-  console.log(req.params.id);
-  console.log("******************");
-
-  await  adminHelper.editSubCategory(req.params.id).then()
+  let subCategory = await adminHelper.getSubCategory(req.params.id);
 
   res.render("admin/pages/categoryManagement/edit-subCategory", {
     admin: true,
@@ -342,10 +324,18 @@ router.post("/edit-subCategory/:id", async(req, res) => {
   });
 });
 
+router.post("/edit-subCategory/:id", async (req, res) => {
+  console.log("******************");
+  console.log(req.params.id);
+  console.log("******************");
 
+  await adminHelper.editSubCategory(req.params.id).then();
 
-
-
+  res.render("admin/pages/categoryManagement/edit-subCategory", {
+    admin: true,
+    subCategory,
+  });
+});
 
 router.get("/edit-category/:id", (req, res) => {
   adminHelper.getCategory(req.params.id).then((category) => {
@@ -373,5 +363,108 @@ router.get("/delete-category/:id", (req, res) => {
     res.redirect("/admin/view-category");
   });
 });
+
+router.get("/offer-management", (req, res) => {
+  res.render("admin/pages/offerManagement/manageOffer", { admin: true });
+});
+
+router.get("/product-offer", async (req, res) => {
+  let products = await adminHelper.getAllProduct();
+
+  res.render("admin/pages/offerManagement/productOffer", {
+    admin: true,
+    products,
+  });
+});
+
+router.get("/add-product-offer/:id", async (req, res) => {
+  let product = await adminHelper.getProductDetails(req.params.id);
+
+  res.render("admin/pages/offerManagement/add-product-offer", {
+    admin: true,
+    product,
+  });
+});
+
+router.post("/add-product-offer/:id", async (req, res) => {
+  let product = await userHelper.getProductDetails(req.params.id);
+  await adminHelper
+    .addProductOffer(req.params.id, req.body, product)
+    .then((response) => {
+      console.log(response);
+      res.json({ offerStatus: true });
+    });
+});
+router.get("/remove-product-offer/:id", async (req, res) => {
+  await adminHelper.removeProductOffer(req.params.id).then((resolve) => {
+    res.redirect("/admin/product-offer");
+  });
+});
+
+
+router.get("/category-offer", async (req, res) => {
+  let category = await adminHelper.getAllCategory();
+
+  res.render("admin/pages/offerManagement/categoryOffer", {
+    admin: true,
+    category,
+  });
+});
+
+
+router.get("/add-category-offer/:id", async (req, res) => {
+  let category = await adminHelper.getCategory(req.params.id);
+
+  res.render("admin/pages/offerManagement/add-category-offer", {
+    admin: true,
+    category,
+  });
+});
+
+//---------------updations needed
+router.post("/add-category-offer/:id", async (req, res) => {
+  let category = await adminHelper.getCategory(req.params.id);
+
+  await adminHelper
+    .addCategoryOffer(req.params.id, req.body, category)
+    .then(async(data) => {
+
+      res.json({ offerStatus: true });
+  
+      //
+    });
+});
+
+
+
+
+
+
+
+router.get("/remove-category-offer/:id", async (req, res) => {
+  console.log(req.params.id);
+  await adminHelper.removeCategoryOffer(req.params.id).then((resolve) => {
+    res.redirect("/admin/category-offer");
+    console.log(req.params.id);
+  });
+});
+
+
+
+
+
+//-----------------sales report--------------
+
+router.get('/sales-report',async(req,res)=>{
+
+ let orders=await adminHelper.getAllOrders()
+ console.log(orders)
+  res.render('admin/pages/sales-report',{admin:true,orders})
+
+
+
+})
+
+
 
 module.exports = router;

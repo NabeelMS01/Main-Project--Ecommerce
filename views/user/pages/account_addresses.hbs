@@ -50,7 +50,8 @@
           <div class="row mb-4">
             <div class="col">
               <div class="form-outline">
-                <input name="name" type="text" id="name" class="form-control"required />
+                <span id="nameSpan" class="text-danger"></span>
+                <input name="name" type="text" id="name" onkeyup="return validName()" class="form-control"required />
                 <label class="form-label" for="form7Example1"> Name</label>
               </div>
             </div>
@@ -59,30 +60,34 @@
 
           <!-- Email input -->
           <div class="form-outline mb-4">
-            <input name="email" type="email" id="form7Example5" class="form-control" required />
+               <span id="emailSpan" class="text-danger"></span>
+            <input name="email" type="email" id="email" onkeyup="return validEmail()" class="form-control" required />
             <label class="form-label" for="form7Example5">Email</label>
           </div>
 
           <!-- address input -->
           <div class="form-outline mb-4">
-            <input name="address" type="text" id="address" class="form-control"  required/>
+               <span id="addressSpan" class="text-danger"></span>
+            <input name="address" type="text" id="address" onkeyup="return validAddress()" class="form-control"  required/>
             <label class="form-label" for="form7Example4">Address</label>
           </div>
 
           <!-- Email input -->
           <div class="form-outline mb-4">
-            <input name="pincode" type="number" id="pincode" class="form-control" />
+       <span id="pincodeSpan" class="text-danger"></span>
+            <input name="pincode" type="number" id="pincode" onkeyup="return validPincode()" class="form-control" />
             <label class="form-label" for="form7Example5">Pin code</label>
           </div>
 
           <!-- Number input -->
           <div class="form-outline mb-4">
-            <input name="phone" type="number" id="phone" class="form-control" />
+                          <span id="numberSpan" class="text-danger"></span>
+            <input name="phone" type="number" id="phone" onkeyup="return validPhone() " class="form-control" />
             <label class="form-label" for="phone">Phone</label>
           </div>
 
           <!-- Message input -->
-             <button onclick="" type="submit" class="btn btn-primary btn-lg btn-block">
+             <button onclick="return validation()" type="submit" class="btn btn-primary btn-lg btn-block">
           Add address
         </button>
 
@@ -119,7 +124,8 @@
           <div class="row mb-4">
             <div class="col">
               <div class="form-outline">
-                <input name="name" type="text" id="name" value="{{this.name}}" class="form-control"required />
+                <span id="nameSpan" class="text-danger"></span>
+                <input name="name" type="text" id="name" onkeyup="return validName()" value="{{this.name}}" class="form-control"required />
                 <label class="form-label" for="form7Example1"> Name</label>
               </div>
             </div>
@@ -128,30 +134,34 @@
 
           <!-- Email input -->
           <div class="form-outline mb-4">
-            <input name="email" type="email" id="form7Example5" value="{{this.email}}" class="form-control" required />
+            <span id="emailSpan" class="text-danger"></span>
+            <input name="email" type="email" id="email"  onkeyup="return validEmail()" value="{{this.email}}" class="form-control" required />
             <label class="form-label" for="form7Example5">Email</label>
           </div>
 
           <!-- address input -->
           <div class="form-outline mb-4">
-            <input name="address"  value="{{this.address}}" type="text" id="address" class="form-control"  required/>
+              <span id="addressSpan" class="text-danger"></span>
+            <input name="address"  value="{{this.address}}" type="text" id="address" onkeyup="return validAddress()" class="form-control"  required/>
             <label class="form-label" for="form7Example4">Address</label>
           </div>
 
           <!-- Email input -->
           <div class="form-outline mb-4">
-            <input name="pincode" type="number" value="{{this.pincode}}"  id="pincode" class="form-control" />
+               <span id="pincodeSpan" class="text-danger"></span>
+            <input name="pincode" type="number" value="{{this.pincode}}" onkeyup="return validPincode()"  id="pincode" class="form-control" required />
             <label class="form-label" for="form7Example5">Pin code</label>
           </div>
 
           <!-- Number input -->
           <div class="form-outline mb-4">
-            <input name="phone" type="number" id="phone" value="{{this.phone}}" class="form-control" />
+              <span id="numberSpan" class="text-danger"></span>
+            <input name="phone" type="number" id="phone" value="{{this.phone}}" onkeyup="return validPhone()" class="form-control" required />
             <label class="form-label" for="phone">Phone</label>
           </div>
 
           <!-- Message input -->
-             <button  type="submit" class="btn btn-primary btn-lg btn-block">
+             <button  type="button  " onclick="return validation()" class="btn btn-primary btn-lg btn-block">
           Update
         </button>
 
@@ -203,6 +213,91 @@
     
 
 
+
+    var errorName = document.getElementById('nameSpan')
+      var errorEmail = document.getElementById('emailSpan')
+  var errorAddress = document.getElementById('addressSpan')
+    var errorPincode = document.getElementById('pincodeSpan')
+      var errorPhone = document.getElementById('numberSpan')
+
+  function validName() {
+        const name = document.getElementById('name').value
+        if (name == "") {
+            errorName.innerHTML = "Field cannot be empty"
+            return false
+        }
+      
+        errorName.innerHTML = null
+        return true
+    }
+      function validEmail() {
+        const name = document.getElementById('email').value
+        if (name == "") { 
+            errorEmail.innerHTML = "enter you email address"  
+            return false
+
+
+        }
+        if (!name.match(/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/)) {
+            errorEmail.innerHTML = 'enter a proper email adress'
+            return false 
+        }
+
+        errorEmail.innerHTML = null
+        return true
+    }
+
+  function validPincode() {
+        const name = document.getElementById('pincode').value
+        if (name == "") {
+            errorPincode.innerHTML = "Field cannot be empty"
+            return false
+        }
+      
+        errorPincode.innerHTML = null
+        return true
+    }
+
+ function validPhone() {
+        const name = document.getElementById('phone').value
+        if (name == "") {
+            errorPhone.innerHTML = "Field cannot be empty"
+            return false
+        }
+         if (name.length>10) {
+            errorPhone.innerHTML = "Invalid phone"
+            return false
+        }
+      
+      
+        errorPhone.innerHTML = null
+        return true
+    }
+
+
+    
+    
+  function validAddress() {
+        const name = document.getElementById('address').value
+        if (name == "") {
+            errorAddress.innerHTML = "Field cannot be empty"
+            return false
+        }
+      
+        errorAddress.innerHTML = null
+        return true
+    }
+
+
+
+    function validation() {
+        if (  !validEmail() && !validName() && !validPincode()&& ! validAddress() && ! validPhone() ) {
+            return false
+        }else if( !validEmail()|| !validName()|| !validPincode()|| ! validAddress()|| ! validPhone()){
+           return false
+        }else{   return true}
+
+    }
 
 
 

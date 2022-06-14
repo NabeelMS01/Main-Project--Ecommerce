@@ -1,5 +1,5 @@
 <hr />
-<div class="container bootstrap snippet" ">
+<div class="container bootstrap snippet" >
 
   <div class="row">
     <div class="col-sm-2">
@@ -34,76 +34,91 @@
         </div>
       </div> }}
 
+
+
+
+
+
+
     </div>
+    
     <!--/col-3-->
-    <div class="col-sm-10">
-      {{#if orders}}
+  
+
+     
+ <div class="col-md-10 ">
+            
+                <div class="shopping__cart__table">
+   {{#if orders}}
       <!-- Basic Bootstrap Table -->
-      <div class="card">
-        <h5 class="card-header">Table Basic</h5>
-        <div class="table-responsive text-nowrap">
-          <table class="table">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Phone</th>
-                <th>address</th>
-                <th>Status </th>
-                <th>Date</th>
-                <th>Cancel</th>
-                <th>Details</th>
-              </tr>
-            </thead>
-            <tbody class="table-border-bottom-0">
-              {{#each orders}}
+    
+      <table>
+                        <thead>
+                            <tr>
+                                <th>Orders</th>
+                                <th></th>
+                                <th></th>
+                                <th> </th>
+                                  <th> </th>
+                            </tr>
+                        </thead>
+                        <tbody>
 
-              <tr>
-                <td><strong>
+                    
 
-                    {{#each this.products}}
-                    -{{product.name}},
-                    <br />
-                    {{/each}}
+                            {{#each orders }}
+                           
+                            <tr >
 
-                  </strong></td>
+                                <td class="product__cart__item"style="cursor: pointer;" onclick="location.href='/orders/{{this._id}}'" >
+                                    <div class="product__cart__item__pic">
+                                        <img style="width: 80px;" src="/uploads/{{this.product.images.[0]}}" alt="">
+                                    </div>
+                                    <div class="product__cart__item__text">
+                                        <h6>{{#each this.products}} <img style="width: 50px;" src="/uploads/{{this.product.images.[0]}}" alt=""> - {{this.product.name}} <br>    {{/each}} </h6>
+                                   
+                                    </div>
+                                </td>
 
-                <td>{{this.deliveryDetails.mobile}}</td>
-                <td>
-                  {{this.deliveryDetails.address}}
-                </td>
-                <td> {{this.status}} </td>
-                <td> {{this.date}}</td>
 
-                <td>
+                                <td class="quantity__item">
 
-                  <span onclick="cancelOrder('{{this._id}}')" class=" badge bg-label-primary me-1"><a
-                      class="confirm_del " style=" text-decoration: none; color: white;"
-                      value="{{this._id}}">Cancel</a></span>
+                                  
+                                </td>
+                                       <td class="cart__price">₹ {{this.totalAmount}}</span></td>
+                                <td class="cart__close">  {{this.status}}</td>
+                         
+                            </tr>
+                           
+                            {{/each}}
 
-                </td>
+           
 
-                <td>
-
-                  <span class="badge bg-label-primary me-1"><a style="text-decoration: none; color: white;"
-                      href="/cancel-order">Details</a></span>
-
-                </td>
-
-              </tr>
-
-              {{/each}}
-
-            </tbody>
-          </table>
-        </div>
-      </div>
-      {{else}}
-
-      <h3>You haven't ordered yet</h3>
+                        </tbody>
+                    </table>
+       
+      
 
       {{/if}}
+                         
+                  
+                </div>
+              
+
+            </div>
+
+
       {{!***************************************** Table end *************************}}
-    </div>
+ 
+
+
+
+
+
+
+
+
+
 
   </div>
   <!--/col-9-->

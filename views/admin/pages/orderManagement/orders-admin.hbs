@@ -1,3 +1,5 @@
+
+
 <!-- Layout wrapper -->
 <div class="layout-wrapper layout-content-navbar">
   <div class="layout-container">
@@ -168,13 +170,13 @@
         <li class="menu-item">
           <a href="javascript:void(0);" class="menu-link menu-toggle">
             <i class="menu-icon tf-icons bx bx-layout"></i>
-            <div data-i18n="Coupon Management">Coupon Management</div>
+            <div data-i18n="Offer Management">Offer Management</div>
           </a>
 
           <ul class="menu-sub">
             <li class="menu-item">
-              <a href="/admin/add-coupon" class="menu-link">
-                <div data-i18n="Add category">Add Coupon</div>
+              <a href="/admin/offer-management" class="menu-link">
+                <div data-i18n="Add category">Manage offers</div>
               </a>
             </li>
 
@@ -219,21 +221,6 @@
 
 
 
-        <!-- Components -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Components</span></li>
-        <!-- Cards -->
-
-        <!-- User interface -->
-
-
-        <!-- Extended components -->
-
-
-
-
-        <!-- Forms & Tables -->
-        <li class="menu-header small text-uppercase"><span class="menu-header-text">Forms &amp; Tables</span></li>
-        <!-- Forms -->
 
 
         <!-- Tables -->
@@ -258,13 +245,7 @@
 
         <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse">
           <!-- Search -->
-          <div class="navbar-nav align-items-center">
-            <div class="nav-item d-flex align-items-center">
-              <i class="bx bx-search fs-4 lh-0"></i>
-              <input type="text" class="form-control border-0 shadow-none" placeholder="Search..."
-                aria-label="Search..." />
-            </div>
-          </div>
+          
           <!-- /Search -->
 
           <ul class="navbar-nav flex-row align-items-center ms-auto">
@@ -313,8 +294,8 @@
                   <a class="dropdown-item" href="#">
                     <span class="d-flex align-items-center align-middle">
                       <i class="flex-shrink-0 bx bx-credit-card me-2"></i>
-                      <span class="flex-grow-1 align-middle">Billing</span>
-                      <span class="flex-shrink-0 badge badge-center rounded-pill bg-danger w-px-20 h-px-20">4</span>
+                      <span class="flex-grow-1 align-middle"  onclick="location.href='/admin/sales-report'"  >Sales Report</span>
+                      
                     </span>
                   </a>
                 </li>
@@ -343,16 +324,16 @@
         <div class="container-xxl flex-grow-1 container-p-y">
 
           <!-- Basic Bootstrap Table -->
-          <div class="card">
+          <div class="card" style="height: 85vh ;"  >
             <h5 class="card-header">All orders</h5>
             <div class="table-responsive text-nowrap">
-              <table class="table">
+              <table id="orderTable" class="table" >
                 <thead>
                   <tr>
                     <th>Items</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Mobile No</th>
+                    <th>Delivery</th>
+        
+                    
                     <th>Date</th>
                     <th>Payment <br> method</th>
                     <th>Total <br> Amount</th>
@@ -372,11 +353,12 @@
 
 
                       </strong></td>
-                    <td>{{this.deliveryDetails.name}}</td>
-                    <td>
-                      {{this.deliveryDetails.email}}
-                    </td>
-                    <td> {{this.deliveryDetails.mobile}}</td>
+                    <td>{{this.deliveryDetails.name}} <br>  {{this.deliveryDetails.email}} <br> 
+                     {{this.deliveryDetails.address}} <br>
+                     {{this.deliveryDetails.mobile}} <br>
+                        </td>
+                    
+                 
                     <td> {{this.date}}</td>
                     <td> {{this.paymentMethod}}</td>
                     <td> {{this.totalAmount}}</td>
@@ -449,6 +431,16 @@
 </div>
 <!-- / Layout wrapper -->
 <script>
+   d
+ $(document).ready(function() {
+    $('#orderTable').DataTable( {
+        dom: 'Bfrtip',
+        buttons: [
+            'copy', 'csv', 'excel', 'pdf', 'print'
+        ]
+    } );
+} );
+
 
   function shipOrder(orderId) {
 
@@ -547,6 +539,12 @@
 
 
   }
+
+
+
+
+
+
 </script>
 
 <!-- Core JS -->

@@ -11,12 +11,14 @@ const client = require("twilio")(config.accountSID, config.authToken);
 
 
 
-var rn = require("random-number");
-var options = {
+let rn = require("random-number");
+let options = {
   min: 10000000,
   max: 99999999,
   integer: true,
 };
+
+
 
 // const instance = new Razorpay({
 //   key_id: 'rzp_test_dvEiQE98PIBRAI',
@@ -50,20 +52,30 @@ router.get("/", async function (req, res, next) {
     req.session.cartCount = cartCount;
     req.session.userData = await userHelper.getUserData(req.session.user._id);
   }
+try{    
+   await userHelper.validateOffer()
+     adminHelper.getAllProduct().then((products) => {
+  adminHelper.getAllCategory().then((category) => {
+    req.session.category = category;
 
-  adminHelper.getAllProduct().then((products) => {
-    adminHelper.getAllCategory().then((category) => {
-      req.session.category = category;
-
-      res.render("user/index", {
-        userUi: true,
-        logedIn: req.session.loggedIn,
-        products,
-        category: req.session.category,
-        cartCount: req.session.cartCount,
-      });
+    res.render("user/index", {
+      userUi: true,
+      logedIn: req.session.loggedIn,
+      products,
+      category: req.session.category,
+      cartCount: req.session.cartCount,
     });
   });
+});
+   }catch(err){
+    res.render('errors/error404')
+   }
+
+
+
+
+
+
 });
 
 //login user
@@ -87,11 +99,11 @@ router.post("/login", (req, res) => {
           if (response.userstatus) {
             req.session.loggedIn = true;
             let user = await userHelper.getPhone(req.body.email);
-            // console.log("*********************");
-            //      console.log(user.phone);
-            //  console.log("******88888888888***************");
-            //        let  number=parseInt(user.phone)
-            //        req.session.phone=number
+            console.log("*********************");
+                 console.log(user.phone);
+             console.log("******88888888888***************");
+                   let  number=parseInt(user.phone)
+                   req.session.phone=number
 
             //  await   client.verify
             //     .services(config.serviceSID)
@@ -102,9 +114,9 @@ router.post("/login", (req, res) => {
             //     .then((data) => {
             //       res.render("user/auth/loginOtpVerify", { userUi: false, number });
 
-            //     });
+            //     }); 
 
-            res.redirect("/");
+          res.redirect("/");
           } else {
             req.flash.loginErr = "your Account is Blocked";
             res.redirect("/login");
@@ -270,6 +282,13 @@ router.get("/add-to-cart/:id", verifyLogin, async (req, res) => {
   let uid = req.params.id;
   let userid = req.session.user._id;
   let product = await adminHelper.getProductDetails(uid);
+
+  if(product.offer_status){
+    product.price=product.offer_price
+  }
+  
+  console.log(product)
+
 
   userHelper.addToCart(uid, userid, product).then(() => {
     res.json({ status: true });
@@ -526,7 +545,7 @@ router.post("/edit-profile", upload.array("proImage"), (req, res, next) => {
 
 router.get("/shop-by-category/:id", async(req, res) => {
 
-let products = await userHelper.getProductByCategory(req.params.id)
+let products = await userHelper. getProductByCategory(req.params.id)
 // let categoryname= await userHelper.getCategoryName(req.params.id)
 console.log(products)
 console.log("heres ")
@@ -589,9 +608,9 @@ router.post("/account-password-change", async (req, res) => {
 
 router.get("/orders", verifyLogin, async (req, res) => {
   let orders = await userHelper.getOrderByUser(req.session.user);
-
+  console.log("-----------------------");
   console.log(orders);
-
+  console.log("-----------------------");
   res.render("user/pages/allOrders", {
     userUi: true,
     category: req.session.category,
@@ -602,13 +621,61 @@ router.get("/orders", verifyLogin, async (req, res) => {
   });
 });
 
+router.get('/orders/:id',async(req,res)=>{
+  let orderDetails =await userHelper.getOrderDetails(req.params.id)
+  let deliveryStatus=false
+  let cancelStatus=true
+  let returnStatus=true
+ if(orderDetails.status=="returned"){
+  returnStatus= false
+  deliveryStatus=true
+  cancelStatus=false
+ }
+   
+   if(orderDetails.status=="shipped"){
+    deliveryStatus=true
+    cancelStatus=false
+   }
+   if(orderDetails.status=="cancelled"){
+    cancelStatus=false
+
+   }
+  res.render('user/pages/orderDetails',{userUi:true,orderDetails,deliveryStatus,cancelStatus,returnStatus})
+})
+
 router.get("/cancel-order/:id", (req, res) => {
   console.log(req.params.id);
-  userHelper.cancelOrder(req.params.id).then(res.json({ status: true }));
+  userHelper.cancelOrder(req.params.id).then(res.json(
+    
+    
+    { status: true })
+    
+    );
 });
+router.get("/return-order/:id", (req, res) => {
+  console.log(req.params.id);
+  userHelper.returnOrder(req.params.id).then(res.json(
+    
+    
+    { status: true })
+    
+    );
+});
+
+
+
+
+
 router.get("/ship-order/:id", (req, res) => {
   console.log(req.params.id);
   userHelper.shipOrder(req.params.id).then(res.json({ status: true }));
+
+
+
+
 });
+
+
+
 
 module.exports = router;
