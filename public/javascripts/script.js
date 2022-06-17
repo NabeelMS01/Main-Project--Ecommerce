@@ -104,7 +104,9 @@ function addToCart(proId){
         method:'get',
         success:(response)=>{
             // console.log('----------------------------------');
-          
+          if(response.loggedinstatus){
+              location.href='/login'
+          }else
          
       if(response.status){
         //   console.log(response.status);

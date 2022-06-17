@@ -358,13 +358,16 @@
                      
                     </div>
                     <div class="card-body">
-                      <form action="/admin/add-category" method="post">
+                      <form action="/admin/add-category" method="post">  
+                      
                         <div class="mb-3">
+
                           <label class="form-label" for="basic-default-fullname">Category Name</label>
-                          <input style="text-transform: uppercase" type="text" name="category_name" class="form-control" id="basic-default-fullname" required />
+                          <input  id="categoryTitle"   onkeyup="return validCategoryName()"   style="text-transform: uppercase" type="text"name="category_name" class="form-control" />
+                        <span id="categorySpan" class="text-danger" ></span>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button onclick="return categoryValidation()" type="submit" class="btn btn-primary">Submit</button>
                       </form>
                     </div>
                   </div>
@@ -396,10 +399,11 @@
                         </select>
 
                           <label class="form-label" for="basic-default-fullname">Sub-Category Name</label>
-                          <input type="text" name="sub_category" class="form-control" id="basic-default-fullname" required />
+                          <input  id="subCategoryinput" type="text" onkeyup="return validSubCategoryName()"  name="sub_category" class="form-control"  />
+                     <span id="subCategorySpan" class="text-danger" ></span>
                         </div>
                         
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button onclick="return subCategoryValidation()" type="submit" class="btn btn-primary">Submit</button>
                       </form>
                     </div>
                   </div>
@@ -441,7 +445,56 @@
  <script>
    
 
+  var errorName = document.getElementById('categorySpan')
+  var errorsubCategory = document.getElementById('subCategorySpan')
 
+
+
+
+  function validCategoryName() {
+    const name = document.getElementById('categoryTitle').value
+    if (name == "") {
+      errorName.innerHTML = "field cannot be empty"
+      return false
+    }
+  
+
+    errorName.innerHTML = null
+    return true
+  }
+
+  function validSubCategoryName() {
+    const name = document.getElementById('subCategory').value
+    if (name =="") {
+      errorsubCategory.innerHTML = "field cannot be empty"
+      return false
+    }
+  
+
+    errorsubCategory.innerHTML = null
+    return true
+  }
+
+
+  function categoryValidation() {
+    if (!validCategoryName()) {
+      return false
+    } else if (!validCategoryName()) {
+      return false
+    } else {
+       return true }
+
+  }
+
+  function subCategoryValidation() {
+    if (!validSubCategoryName()) {
+      return false
+    } else if (!validSubCategoryName()) {
+      return false
+    } else {
+       return true }
+
+  }
    
    
 

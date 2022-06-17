@@ -7,7 +7,7 @@ const router = express.Router();
 const controller = require("../controller/controller");
 const upload = require("../middlewere/multer");
 const async = require("hbs/lib/async");
-const { Db } = require("mongodb");
+const { Db, Admin } = require("mongodb");
 const userHelper = require("../helpers/userHelper");
 
 let admin = {
@@ -401,7 +401,6 @@ router.get("/remove-product-offer/:id", async (req, res) => {
   });
 });
 
-
 router.get("/category-offer", async (req, res) => {
   let category = await adminHelper.getAllCategory();
 
@@ -410,7 +409,6 @@ router.get("/category-offer", async (req, res) => {
     category,
   });
 });
-
 
 router.get("/add-category-offer/:id", async (req, res) => {
   let category = await adminHelper.getCategory(req.params.id);
@@ -427,19 +425,12 @@ router.post("/add-category-offer/:id", async (req, res) => {
 
   await adminHelper
     .addCategoryOffer(req.params.id, req.body, category)
-    .then(async(data) => {
-
+    .then(async (data) => {
       res.json({ offerStatus: true });
-  
+
       //
     });
 });
-
-
-
-
-
-
 
 router.get("/remove-category-offer/:id", async (req, res) => {
   console.log(req.params.id);
@@ -448,23 +439,93 @@ router.get("/remove-category-offer/:id", async (req, res) => {
     console.log(req.params.id);
   });
 });
+//-------------coupon management--------------
 
+router.get("/view-coupon", async (req, res) => {
+  let coupons = await adminHelper.getAllCoupons();
 
+  res.render("admin/pages/offerManagement/viewCoupon", {
+    admin: true,
+    coupons,
+  });
+});
 
+router.post("/add-coupon", (req, res) => {
+  console.log(req.body);
+  adminHelper.addCouponCode(req.body).then((response) => {
+    console.log("here");
+    res.json({ status: true });
+  });
+});
+router.get("/remove-code/:id", (req, res) => {
+  console.log(req.body);
 
+  adminHelper.removeCouponCode(req.params.id).then((response) => {
+    res.json({ status: true });
+  });
+});
 
 //-----------------sales report--------------
 
-router.get('/sales-report',async(req,res)=>{
+router.get("/sales-report", async (req, res) => {
+  let orders = await adminHelper.getAllOrders();
+  console.log(orders);
+  res.render("admin/pages/sales-report", { admin: true, orders });
+});
 
- let orders=await adminHelper.getAllOrders()
- console.log(orders)
-  res.render('admin/pages/sales-report',{admin:true,orders})
+//------------------------banner management-------------------
+
+router.get("/add-banners", async (req, res) => {
+  let subCategory = await adminHelper.getAllSubcategory();
+
+  res.render("admin/pages/bannerManagement/addBanner", {
+    admin: true,
+    subCategory,
+    bannerSuccess: req.session.bannerSuccess,
+  });
+
+  bannerSuccess = null;
+});
+
+router.post("/add-banners", upload.array("bannerimage"), async (req, res) => {
+  console.log(req.files);
+  console.log(req.body);
+  let arr = [];
+
+  req.files.forEach(function (files, index, ar) {
+    console.log(req.files[index].filename);
+
+    arr.push(req.files[index].filename);
+  });
+
+  await adminHelper.addBanner(req.body, arr).then((response) => {
+    req.session.bannerSuccess = "banner added";
+    res.redirect("/admin/add-banners");
+  });
+});
+
+router.get("/view-banners/", async(req, res) => {
+
+  let banners =await userHelper.getAllBanners()
+
+
+  res.render("admin/pages/bannerManagement/viewBanner", { admin: true,banners });
+});
+
+router.get('delete-banner/:id',async(req,res)=>{
+
+  await adminHelper.deleteBanner(req.params.id).then((response)=>{
+         
+
+ res.json({status:true})
+
+
+  })
+
 
 
 
 })
-
 
 
 module.exports = router;

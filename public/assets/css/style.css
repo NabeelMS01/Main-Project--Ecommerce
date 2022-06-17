@@ -973,7 +973,8 @@ ol {
 }
 
 .product__item__pic {
-	height: 260px;
+	min-height: 280px;
+  
 	position: relative;
 	background-position: center center;
 }

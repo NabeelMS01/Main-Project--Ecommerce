@@ -727,6 +727,27 @@ module.exports = {
       resolve(products);
     });
   },
+
+  //-----------------getProduct By Collection----------------
+
+  getProductByCollection: (id) => {
+    console.log(id);
+
+    console.log("*********************+6++");
+    return new Promise(async (resolve, reject) => {
+      let products = await db
+        .get()
+        .collection(collection.PRODUCT_COLLECTION)
+        .find({sub_category_id:ObjectId(id) })
+        .toArray();
+
+        console.log(products);
+
+        console.log("*********************+6++");
+      resolve(products);
+    });
+  },
+
   //---------------------razor Pay integration------------------
 
   generateRazorPay: (orderId, totalPrice) => {
@@ -906,8 +927,6 @@ module.exports = {
     });
   },
 
-
-  
   shipOrder: (orderId) => {
     return new Promise(async (resolve, reject) => {
       await db
@@ -938,23 +957,36 @@ module.exports = {
 
       for (i = 0; i < products.length; i++) {
         if (products[i].offer_status) {
-       let nowDate = new Date().toISOString().split("T")[0];
-       let endDate =products[i].offer_end.toISOString().split("T")[0]
-          nowDate=new Date(nowDate)
-          endDate=new Date(endDate)
-//  console.log(nowDate);
-//  console.log(endDate);
-          if (nowDate>=endDate ) {
-           
-          adminHelper.removeProductOffer(products[i]._id);
+          let nowDate = new Date().toISOString().split("T")[0];
+          let endDate = products[i].offer_end.toISOString().split("T")[0];
+          nowDate = new Date(nowDate);
+          endDate = new Date(endDate);
+          //  console.log(nowDate);
+          //  console.log(endDate);
+          if (nowDate >= endDate) {
+            adminHelper.removeProductOffer(products[i]._id);
             console.log("delete Success ******************");
           }
-
-          
         }
       }
 
       resolve();
     });
   },
+
+
+//------------------banner management-------------
+
+getAllBanners:()=>{
+return new Promise(async(resolve,reject)=>{
+    let banners = await db.get().collection(collection.BANNER_COLLECTION).find().toArray()
+    resolve(banners)
+
+})
+
+
+}
+
+
+
 };

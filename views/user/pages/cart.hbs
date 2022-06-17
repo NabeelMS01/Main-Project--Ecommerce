@@ -76,6 +76,36 @@
 
 {{#if products}}
 
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Available coupons</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+     
+     <form action="">
+     {{#each couponCodes}}
+    <div class="row">
+       <h4>  <input type="radio" name="coupon_code" value="{{this.coupon_codes}}"> {{this.coupon_code}}</h4>
+            <small>₹{{this.offer}} OFF</small>
+    </div>
+ {{/each}}
+     </form>
+
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Select Coupon</button>
+      </div>
+    </div>
+  </div>
+</div>
             <div class="col-lg-4">
                 <div class="cart__discount">
                     <h6>Discount codes</h6>
@@ -83,7 +113,11 @@
                         <input type="text" placeholder="Coupon code">
                         <button type="submit">Apply</button>
                     </form>
+ <h6  style="cursor: pointer;"  data-toggle="modal" data-target="#exampleModal" >Show available coupons for you</h6>
+
+
                 </div>
+
                 <div class="cart__total">
                     <h6>Cart total</h6>
                     <ul>

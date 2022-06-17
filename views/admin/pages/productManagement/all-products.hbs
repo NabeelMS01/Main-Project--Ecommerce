@@ -366,7 +366,7 @@
                     </td>
                     <td>{{this.name}}</td>
 
- <td>
+                    <td>
                       {{this.stock}}
                     </td>
 
@@ -469,44 +469,8 @@
         ]
     } );
 } );
-  function deleteProduct(proId) {
+  
 
-    console.log(proId)
-    swal({
-      title: "Are you sure? You want to delete the product",
-      icon: "warning",
-      buttons: true,
-      dangerMode: true,
-    })
-      .then((willDelete) => {
-        if (willDelete) {
-
-
-          $.ajax(
-            {
-              url: `/admin/delete-product/${proId}`,
-              method: 'get',
-
-              success: (response) => {
-
-                if (response.status) {
-
-                  swal("Poof! Your product has been deleted!", {
-                    icon: "success",
-                  });
-                  location.reload()
-                }
-              }
-            }
-          )
-        } else {
-          swal("product is not deleted");
-        }
-      });
-
-
-  }
-  ;
 
   function deleteProduct(proId) {
 
