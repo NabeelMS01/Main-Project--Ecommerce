@@ -70,7 +70,7 @@ module.exports = {
       console.log("bcrypt");
       userData.password = await bcrypt.hash(userData.password, 10);
       userData.status = true;
-      userData.used_coupons=[]
+      userData.used_coupons = [];
       db.get()
         .collection(collection.USER_COLLECTION)
         .insertOne(userData)
@@ -286,6 +286,16 @@ module.exports = {
       }
 
       resolve(count);
+    });
+  },
+
+  getCartByUser: (id) => {
+    return new Promise(async (resolve, reject) => {
+      let cart = await db
+        .get()
+        .collection(collection.CART_COLLECTION)
+        .findOne({ user: ObjectId(id) });
+      resolve(cart);
     });
   },
   addToCart: (proId, userId, product) => {
@@ -567,8 +577,18 @@ module.exports = {
         ])
         .toArray();
 
+      let cartOffer = await db
+        .get()
+        .collection(collection.CART_COLLECTION)
+        .findOne({ user: ObjectId(userId) });
+ 
+      if (cartOffer.coupon_offer_status) {
+        cartTotalAmount[0].total =
+          cartTotalAmount[0].total - cartOffer.coupon_offer;
+      }
+      console.log("55555555555555");
       console.log(cartTotalAmount[0]);
-
+   
       if (cartTotalAmount[0] === undefined) {
         resolve();
       } else {
@@ -642,7 +662,7 @@ module.exports = {
   },
 
   // ------------------place order--------------------
-  placeOrder: (order, products, total) => {
+  placeOrder: (order, products, total,id,coupon) => {
     return new Promise(async (resolve, reject) => {
       let status = order["payment_method"] === "cod" ? "placed" : "pending";
 
@@ -663,6 +683,22 @@ module.exports = {
         status: status,
         delivery_status: false,
       };
+
+
+      if(coupon){
+
+await db.get().collection(collection.USER_COLLECTION).updateOne({_id:ObjectId(id)},{
+$push:{used_coupons:coupon.coupon_code}
+})
+
+  
+      }
+
+      
+
+
+
+
 
       db.get()
         .collection(collection.ORDER_COLLECTION)
@@ -987,47 +1023,75 @@ module.exports = {
       resolve(banners);
     });
   },
-  getCouponData:(data)=>{
-    return new Promise(async(resolve,reject)=>{
-      
-   let coupon=  await db.get().collection(collection.COUPON_COLLECTION).aggregate([
-        {
-          $match:{
-            coupon_code:data.coupon_code
-          }
-        }
-      ]).toArray()
-  resolve(coupon[0])
-    
-    })
-
-
+  getCouponData: (data) => {
+    return new Promise(async (resolve, reject) => {
+      let coupon = await db
+        .get()
+        .collection(collection.COUPON_COLLECTION)
+        .aggregate([
+          {
+            $match: {
+              coupon_code: data.coupon_code,
+            },
+          },
+        ])
+        .toArray();
+      resolve(coupon[0]);
+    });
   },
-  couponCheck:(userId,couponCode)=>{
+  couponCheck: (userId, couponCode) => {
+    return new Promise(async (resolve, reject) => {
+      let user = await db
+        .get()
+        .collection(collection.USER_COLLECTION)
+        .findOne({ _id: ObjectId(userId) });
+
+      let list = user.used_coupons;
+      let couponUsed = false;
+      for (let i = 0; i <= list.length; i++) {
+        couponUsed = false;
+
+        if (list[i] == couponCode) {
+          couponUsed = true;
+          break;
+        }
+      }
+
+      console.log(couponUsed);
+      resolve(couponUsed);
+    });
+  },
+  addcoupontocart: (coupon, id) => {
+    return new Promise(async (resolve, reject) => {
+      await db
+        .get()
+        .collection(collection.CART_COLLECTION)
+        .updateOne(
+          { user: ObjectId(id) },
+          {
+            $set: {
+              coupon_offer: coupon.offer,
+              coupon_offer_status: coupon.status,
+            },
+          },
+          {
+            upsert: true,
+          }
+        );
+      resolve();
+    });
+  },
+
+  removeCouponFromCart:(id)=>{
     return new Promise(async(resolve,reject)=>{
-let user = await db.get().collection(collection.USER_COLLECTION).findOne({_id:ObjectId(userId)})     
-  
-
- let list=user.used_coupons
-let couponUsed=false;
-for(let i=0;i<=list.length;i++){
-  couponUsed=false;
-
-  if(list[i]==couponCode.coupon_code){
-      console.log(list);
-    console.log("logged");
-    couponUsed=true
-    break;
-   
+await db.get().collection(collection.CART_COLLECTION).updateOne({_id:ObjectId(id)},{
+  $set:{ 
+    coupon_offer:parseInt(0),
+    coupon_offer_status:false
   }
-
-}
-
-
-console.log(couponUsed);
-  resolve(couponUsed)
-
-
+}).then((response)=>{
+  resolve()
+})
 
 
     })

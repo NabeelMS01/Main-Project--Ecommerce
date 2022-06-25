@@ -53,7 +53,7 @@ router.get("/", async function (req, res, next) {
     adminHelper.getAllProduct().then((products) => {
       adminHelper.getAllCategory().then(async (category) => {
         let banners = await adminHelper.getAllBanners();
-        let CollectionCard= await adminHelper.getCollectionCards()
+        let CollectionCard = await adminHelper.getCollectionCards();
         req.session.category = category;
 
         res.render("user/index", {
@@ -63,7 +63,7 @@ router.get("/", async function (req, res, next) {
           category: req.session.category,
           cartCount: req.session.cartCount,
           banners,
-          CollectionCard
+          CollectionCard,
         });
       });
     });
@@ -257,6 +257,7 @@ router.get("/cart", verifyLogin, async (req, res) => {
   let products = await userHelper.getCartProducts(req.session.user._id);
   let totalAmount = await userHelper.getTotalAmount(req.session.user._id);
   let addresses = await userHelper.getAddress(req.session.user._id);
+  let cart = await userHelper.getCartByUser(req.session.user._id);
   let couponCodes = await adminHelper.getAllCoupons();
   req.session.totalAmount = totalAmount;
   res.render("user/pages/cart", {
@@ -269,24 +270,22 @@ router.get("/cart", verifyLogin, async (req, res) => {
     totalAmount: req.session.totalAmount,
     addresses,
     couponCodes,
-    couponcode:req.session.coupondata,
+    couponcode: req.session.coupondata,
     userData: req.session.userData,
+    couponmsg: req.session.couponmsg,
+    cart,
   });
-  req.session.coupondata=null
+  // req.session.coupondata = null;
+  // req.session.couponmsg=null
 });
 
-router.post('/applycodetocart',(req,res)=>{
-req.session.coupondata=req.body.coupon_code
-console.log(req.body);
-console.log("///////////////////");
+router.post("/applycodetocart", (req, res) => {
+  req.session.coupondata = req.body.coupon_code;
+  console.log(req.body);
+  console.log("///////////////////");
 
-
-res.redirect('/cart')
-
-})
-
-
-
+  res.redirect("/cart");
+});
 
 router.get("/add-to-cart/:id", async (req, res) => {
   if (!req.session.loggedIn) {
@@ -313,14 +312,12 @@ router.get("/add-to-cart/:id", async (req, res) => {
 router.post("/change-product-quantity", async (req, res) => {
   console.log(req.body);
 
-
   userHelper.changeProductQuantity(req.body).then(async (response) => {
-   
     response.totalAmount = await userHelper.getTotalAmount(req.body.user);
     response.cartProductTotal = await userHelper.getCartProductTotal(
       req.session.user._id
     );
- 
+
     // console.log(response);
     console.log(response);
     res.json(response);
@@ -386,10 +383,17 @@ router.post("/place-order", verifyLogin, async (req, res) => {
   if (req.body.payment_method == "cod") {
     totalPrice = totalPrice * 100;
     await userHelper
-      .placeOrder(req.body, products, totalPrice)
+      .placeOrder(req.body, products, totalPrice,req.session.user._id,req.session.appliedCoupon)
       .then((orderId) => {
         res.json({ codsuccess: true });
       });
+
+
+
+
+
+
+
   } else if (req.body.payment_method == "razorpay") {
     totalPrice = totalPrice * 100;
     // await userHelper.placeOrderOnline(req.body, products, totalPrice).then(async(orderId) => {
@@ -664,46 +668,66 @@ router.get("/ship-order/:id", (req, res) => {
   userHelper.shipOrder(req.params.id).then(res.json({ status: true }));
 });
 
+router.get("/collection/:id", async (req, res) => {
+  let products = await userHelper.getProductByCollection(req.params.id);
 
-router.get('/collection/:id',async(req,res)=>{
+  res.render("user/pages/shop", {
+    userUi: true,
+    category: req.session.category,
+    cartCount: req.session.cartCount,
+    logedIn: req.session.loggedIn,
+    user: req.session.user,
+    products: products,
+  });
+});
 
- let products=await userHelper.getProductByCollection(req.params.id)
+router.post("/apply-coupon", async (req, res) => {
+  try {
+    let totalAmount = req.session.totalAmount;
 
- res.render('user/pages/shop',{
-  userUi: true,
-  category: req.session.category,
-  cartCount: req.session.cartCount,
-  logedIn: req.session.loggedIn,
-  user: req.session.user,
-  products:products,
+    let coupon = await userHelper.getCouponData(req.body);
 
- })
-})
+    if (coupon == undefined) {
+      res.json({ invalidCoupon: true });
+    } else {
+      console.log("6666666666666666");
+      let usedCouponCheck = await userHelper.couponCheck(
+        req.session.user._id,
+        coupon.coupon_code
+      );
+
+      console.log(usedCouponCheck);
+      if (!usedCouponCheck) {
+        console.log(coupon, totalAmount);
+
+        await userHelper
+          .addcoupontocart(coupon, req.session.user._id)
+          .then(async () => {
+            let cart = await userHelper.getCartByUser(req.session.user._id);
+              req.session.appliedCoupon=coupon
+            req.session.couponmsg = `coupon applied !! ₹ ${cart.coupon_offer} offer added`;
+            res.json({ coupon, totalAmount, cart });
+          });
+      }
+    }
+  } catch (err) {
+    console.log(err);
+  }
+});
+
+router.get('/removecoupon/:id',async(req,res)=>{
+
+  await userHelper.removeCouponFromCart(req.params.id).then((response)=>{
+req.session.coupondata = null;
+   req.session.couponmsg=null
+   req.session.appliedCoupon=null
+    res.json({removed:true})
 
 
-router.post('/apply-coupon',async(req,res)=>{
-let totalAmount=req.session.totalAmount
-
-
-let coupon=await userHelper.getCouponData(req.body)
-
-
-if(coupon==undefined){
-
-  res.json({invalidCoupon: true})
-}else{ 
+  })
   
-  console.log('6666666666666666');
-let usedCouponCheck=await userHelper.couponCheck(req.session.user._id,coupon.coupon_code)
-
-console.log(usedCouponCheck);
-
-     }
 
 
-
- 
 })
-
 
 module.exports = router;

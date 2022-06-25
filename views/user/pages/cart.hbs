@@ -154,6 +154,9 @@
 
 
                 </div>
+ {{#if couponmsg}}
+       <span id="couponmsgspan" class="text-danger" >{{couponmsg}}</span> <span onclick="removeCoupon('{{cart._id}}')" style="color: rgb(0, 47, 255); cursor: pointer; "   id="removecpn" >remove coupon</span>
+{{/if}}
 
                 <div class="cart__total">
                     <h6>Cart total</h6>
@@ -239,11 +242,66 @@
 </div>
 
 <script>
+  let errorSpan=document.getElementById('invalidCouponSpan')
+ let couponSpan=document.getElementById('couponmsgspan')
+   let removecpn=document.getElementById('removecpn')
+
+
+
+
+ function removeCoupon(id){
+
+    
+
+      swal({
+          title: "Are you sure? You want to remove the coupon from cart",
+          icon: "warning",
+          buttons: true,
+          dangerMode: true,
+        })
+          .then((willDelete) => {
+            if (willDelete) {
+    
+    
+    
+            $.ajax(
+                {
+                    url: `/removecoupon/${id}`,
+                   
+                    method: "GET",
+                    success: (response) => {
+                        if(response.removed){
+    
+                        
+                        swal("Poof! coupon removed from cart!", {
+                        icon: "success",
+                      }).then(
+                          ()=>{
+                              location.reload()
+                          }
+                      )
+    
+    
+    
+                               
+                        }
+                   
+    
+                    }
+                }
+            )
+            }
+        })
+}
+
+
+
+
 
   function invalidCoupon(){
-     let errorSpan=document.getElementById('invalidCouponSpan')
+   
 
-errorSpan.innerHTML=null
+errorSpan.innerText=null
   }
 
 
@@ -258,21 +316,35 @@ errorSpan.innerHTML=null
             data: $('#couponform').serialize(),
             success: function (response) {
                 if(response.invalidCoupon){
-   let errorSpan=document.getElementById('invalidCouponSpan')
+  
 
-errorSpan.innerHTML="invalid coupon"
+errorSpan.innerText="invalid coupon"
 
                 }
  
-                if (response.offerStatus) {
-                    swal("Offer added successfully!", "!", "success").then(
+                if (response.coupon) {
+
+      console.log(response.cart)
+  
+
+    location.href="/cart"
+  
+      
+  couponSpan.innerText=`coupon applied !! ₹ ${response.coupon.offer} offer added `
+
+                    /*swal("Offer added successfully!", "!", "success").then(
                         () => {
                             location.href = '/admin/category-offer'
                         }
-                    );
+                    ); */
+                   
+                    
+                }else{
+
+                     couponSpan.innerText="Invalid coupon"
                 }
 
-
+           
 
 
 
