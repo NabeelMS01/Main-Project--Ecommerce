@@ -56,7 +56,8 @@
             $.ajax(
                 {
                     url: '/change-product-quantity',
-                    data: {
+                    data: { 
+                       
                         user:userId,
                         cart: cartId,
                         product: proId,

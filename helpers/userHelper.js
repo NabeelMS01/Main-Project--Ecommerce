@@ -70,6 +70,7 @@ module.exports = {
       console.log("bcrypt");
       userData.password = await bcrypt.hash(userData.password, 10);
       userData.status = true;
+      userData.used_coupons=[]
       db.get()
         .collection(collection.USER_COLLECTION)
         .insertOne(userData)
@@ -738,12 +739,12 @@ module.exports = {
       let products = await db
         .get()
         .collection(collection.PRODUCT_COLLECTION)
-        .find({sub_category_id:ObjectId(id) })
+        .find({ sub_category_id: ObjectId(id) })
         .toArray();
 
-        console.log(products);
+      console.log(products);
 
-        console.log("*********************+6++");
+      console.log("*********************+6++");
       resolve(products);
     });
   },
@@ -887,7 +888,7 @@ module.exports = {
         .get()
         .collection(collection.ORDER_COLLECTION)
         .find({ userId: ObjectId(user._id) })
-        .sort({ time: -1 })
+        .sort({ date: -1 })
         .toArray();
       console.log(orders);
       resolve(orders);
@@ -974,19 +975,63 @@ module.exports = {
     });
   },
 
+  //------------------banner management-------------
 
-//------------------banner management-------------
+  getAllBanners: () => {
+    return new Promise(async (resolve, reject) => {
+      let banners = await db
+        .get()
+        .collection(collection.BANNER_COLLECTION)
+        .find()
+        .toArray();
+      resolve(banners);
+    });
+  },
+  getCouponData:(data)=>{
+    return new Promise(async(resolve,reject)=>{
+      
+   let coupon=  await db.get().collection(collection.COUPON_COLLECTION).aggregate([
+        {
+          $match:{
+            coupon_code:data.coupon_code
+          }
+        }
+      ]).toArray()
+  resolve(coupon[0])
+    
+    })
 
-getAllBanners:()=>{
-return new Promise(async(resolve,reject)=>{
-    let banners = await db.get().collection(collection.BANNER_COLLECTION).find().toArray()
-    resolve(banners)
 
-})
+  },
+  couponCheck:(userId,couponCode)=>{
+    return new Promise(async(resolve,reject)=>{
+let user = await db.get().collection(collection.USER_COLLECTION).findOne({_id:ObjectId(userId)})     
+  
 
+ let list=user.used_coupons
+let couponUsed=false;
+for(let i=0;i<=list.length;i++){
+  couponUsed=false;
+
+  if(list[i]==couponCode.coupon_code){
+      console.log(list);
+    console.log("logged");
+    couponUsed=true
+    break;
+   
+  }
 
 }
 
+
+console.log(couponUsed);
+  resolve(couponUsed)
+
+
+
+
+    })
+  }
 
 
 };

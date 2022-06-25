@@ -53,6 +53,7 @@ router.get("/", async function (req, res, next) {
     adminHelper.getAllProduct().then((products) => {
       adminHelper.getAllCategory().then(async (category) => {
         let banners = await adminHelper.getAllBanners();
+        let CollectionCard= await adminHelper.getCollectionCards()
         req.session.category = category;
 
         res.render("user/index", {
@@ -62,6 +63,7 @@ router.get("/", async function (req, res, next) {
           category: req.session.category,
           cartCount: req.session.cartCount,
           banners,
+          CollectionCard
         });
       });
     });
@@ -267,9 +269,24 @@ router.get("/cart", verifyLogin, async (req, res) => {
     totalAmount: req.session.totalAmount,
     addresses,
     couponCodes,
+    couponcode:req.session.coupondata,
     userData: req.session.userData,
   });
+  req.session.coupondata=null
 });
+
+router.post('/applycodetocart',(req,res)=>{
+req.session.coupondata=req.body.coupon_code
+console.log(req.body);
+console.log("///////////////////");
+
+
+res.redirect('/cart')
+
+})
+
+
+
 
 router.get("/add-to-cart/:id", async (req, res) => {
   if (!req.session.loggedIn) {
@@ -295,14 +312,15 @@ router.get("/add-to-cart/:id", async (req, res) => {
 
 router.post("/change-product-quantity", async (req, res) => {
   console.log(req.body);
-  console.log("*----------------------*");
+
 
   userHelper.changeProductQuantity(req.body).then(async (response) => {
+   
     response.totalAmount = await userHelper.getTotalAmount(req.body.user);
     response.cartProductTotal = await userHelper.getCartProductTotal(
       req.session.user._id
     );
-
+ 
     // console.log(response);
     console.log(response);
     res.json(response);
@@ -660,9 +678,31 @@ router.get('/collection/:id',async(req,res)=>{
   products:products,
 
  })
+})
+
+
+router.post('/apply-coupon',async(req,res)=>{
+let totalAmount=req.session.totalAmount
+
+
+let coupon=await userHelper.getCouponData(req.body)
+
+
+if(coupon==undefined){
+
+  res.json({invalidCoupon: true})
+}else{ 
+  
+  console.log('6666666666666666');
+let usedCouponCheck=await userHelper.couponCheck(req.session.user._id,coupon.coupon_code)
+
+console.log(usedCouponCheck);
+
+     }
 
 
 
+ 
 })
 
 

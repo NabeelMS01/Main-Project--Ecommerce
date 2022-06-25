@@ -485,6 +485,8 @@ ol {
 	font-weight: 600;
 	position: relative;
 	padding: 3px 0;
+	text-decoration: none;
+	font-weight:  600   !important;
 }
 
 .header__menu ul li a:after {
@@ -516,10 +518,13 @@ ol {
 
 .header__nav__option a span {
 	color: #0d0d0d;
-	font-size: 11px;
+	font-size: 15px;
 	position: absolute;
-	left: 5px;
-	top: 8px;
+	left: 15px;
+	top: -10px;
+	font-weight: 900;
+	
+
 }
 
 .header__nav__option a:last-child {

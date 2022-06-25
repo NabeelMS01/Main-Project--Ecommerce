@@ -1,3 +1,5 @@
+
+
 <!-- Breadcrumb Section Begin -->
 <section class="breadcrumb-option">
     <div class="container">
@@ -16,7 +18,7 @@
     </div>
 </section>
 <!-- Breadcrumb Section End -->
-<button type="button" class="primary-btn m-auto " data-toggle="modal" data-target=".bd-example-modal-lg">Select Another
+<button  id="selectad" type="button" class="primary-btn  ml-5 mt-5"   data-toggle="modal" data-target=".bd-example-modal-lg">Select Another
     address</button>
 <!-- Checkout Section Begin -->
 <section class="checkout spad">
@@ -125,6 +127,7 @@
 <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel"
     aria-hidden="true">
     <div class="modal-dialog modal-lg">
+        
 {{#if addresses}}
         <div class="modal-content">
 
@@ -160,10 +163,12 @@
 
 
             </form>
-
+ <h5 class="mb-5 ml-5"> Would you like to add an address? please  <a class="text-primary" href="/account-addresses"> click here </a></h5>
 
         </div>
 {{else}}
+
+
 <div class="modal-content" >
 
 
@@ -181,7 +186,6 @@
 
 
 {{/if}}
-
 
 
     </div>

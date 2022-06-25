@@ -467,10 +467,20 @@ router.get("/remove-code/:id", (req, res) => {
 
 //-----------------sales report--------------
 
-router.get("/sales-report", async (req, res) => {
+router.get("/sales-report", async (req, res) => {    
   let orders = await adminHelper.getAllOrders();
   console.log(orders);
-  res.render("admin/pages/sales-report", { admin: true, orders });
+let totalAmount=await adminHelper.getTotalRevenue()
+
+  res.render("admin/pages/sales-report", { admin: true, orders,totalAmount });
+});
+router.post("/sales-report", async(req, res) => {  
+  console.log(req.body);  
+  let orders = await adminHelper.getAllOrdersByDate(req.body.from_date,req.body.end_date);
+
+let totalAmount=await adminHelper.getTotalRevenueByDate(req.body.from_date,req.body.end_date)
+ console.log(orders);
+  res.render("admin/pages/sales-report", { admin: true, orders,totalAmount,startDate:req.body.from_date,endDate:req.body.end_date });
 });
 
 //------------------------banner management-------------------
@@ -504,28 +514,166 @@ router.post("/add-banners", upload.array("bannerimage"), async (req, res) => {
   });
 });
 
-router.get("/view-banners/", async(req, res) => {
+router.get("/view-banners/", async (req, res) => {
+  let banners = await userHelper.getAllBanners();
 
-  let banners =await userHelper.getAllBanners()
+  res.render("admin/pages/bannerManagement/viewBanner", {
+    admin: true,
+    banners,
+    bannerSuccess: req.session.bannerSuccess,
+  });
 
-
-  res.render("admin/pages/bannerManagement/viewBanner", { admin: true,banners });
+  req.session.bannerSuccess = null;
 });
 
-router.get('delete-banner/:id',async(req,res)=>{
+router.get("/delete-banner/:id", async (req, res) => {
+  await adminHelper.deleteBanner(req.params.id).then((response) => {
+    res.json({ status: true });
+  });
+});
+router.get("/edit-banner/:id", async (req, res) => {
+  let subCategory = await adminHelper.getAllSubcategory();
+  let banner = await adminHelper.getBannerDetails(req.params.id);
+  console.log(banner);
 
-  await adminHelper.deleteBanner(req.params.id).then((response)=>{
-         
+  res.render("admin/pages/bannerManagement/editBanner", {
+    admin: true,
+    banner: banner,
+    bannerId: req.params.id,
+    subCategory,
+  });
+});
 
- res.json({status:true})
+router.post(
+  "/edit-banner/:id",
+  upload.array("bannerimage"),
+  async (req, res) => {
+    console.log(req.files);
+    console.log(req.body);
+    let arr = [];
+
+    req.files.forEach(function (files, index, ar) {
+      console.log(req.files[index].filename);
+
+      arr.push(req.files[index].filename);
+    });
+
+    await adminHelper
+      .editBanner(req.params.id, req.body, arr)
+      .then((response) => {
+        req.session.bannerSuccess = "banner added";
+        res.redirect("/admin/view-banners");
+      });
+  }
+);
+
+router.get("/deactivate-banner/:id", async (req, res) => {
+  await adminHelper.deactivateBanner(req.params.id).then((response) => {
+    res.json({ status: true });
+  });
+});
+router.get("/activate-banner/:id", async (req, res) => {
+  await adminHelper.activateBanner(req.params.id).then((response) => {
+    res.json({ status: true });
+  });
+});
+
+//--------------------collection card management --------------------
 
 
-  })
+router.get("/add-collectionCard", async (req, res) => {
+  let subCategory = await adminHelper.getAllSubcategory();
+
+  res.render("admin/pages/collectionCardManagement/addCollectionCard", {
+    admin: true,
+    bannerSuccess: req.session.bannerSuccess,
+    subCategory,
+  });
+  req.session.bannerSuccess=null
 
 
+});
+
+router.post(
+  "/add-collectionCard",
+  upload.array("cardimage"),
+  async (req, res) => {
+    console.log(req.files);
+    console.log(req.body);
+    let arr = [];
+
+    req.files.forEach(function (files, index, ar) {
+      console.log(req.files[index].filename);
+
+      arr.push(req.files[index].filename);
+    });
+
+    await adminHelper.addCardCollection(req.body, arr).then((response) => {
+      req.session.bannerSuccess = "Collection Card added";
+      res.redirect("/admin/add-collectionCard");
+    });
+  }
+);
+
+router.get('/view-collectionCard',async(req,res)=>{
+  let cardCollection =await adminHelper.getCollectionCards()
+
+res.render('admin/pages/collectionCardManagement/viewCollectionCard',{admin:true,cardCollection,bannerSuccess:req.session.bannerSuccess})
+
+})
+
+
+
+router.get("/deactivate-collectionCard/:id", async (req, res) => {
+  await adminHelper.deactivatecollectionCard(req.params.id).then((response) => {
+    res.json({ status: true });
+  });
+});
+router.get("/activate-collectionCard/:id", async (req, res) => {
+  await adminHelper.activatecollectionCard(req.params.id).then((response) => {
+    res.json({ status: true });
+  });
+});
+
+
+router.get('/edit-collectionCard/:id',async(req,res)=>{
+
+  let cardCollection= await adminHelper.getCollectionCardDetails(req.params.id)
+
+  res.render('admin/pages/collectionCardManagement/editCollectionCard',{admin:true,cardCollection})
 
 
 })
+
+
+router.post("/edit-collectionCard/:id",  upload.array("cardimage"),async(req,res)=>{
+  
+  console.log(req.files);
+  console.log(req.body);
+  let arr = [];
+
+  req.files.forEach(function (files, index, ar) {
+    console.log(req.files[index].filename);
+
+    arr.push(req.files[index].filename);
+  });
+
+  await adminHelper.editCollectionCard(req.params.id, req.body, arr)
+    .then((response) => {
+      req.session.bannerSuccess = "card added";
+      res.redirect("/admin/view-collectionCard");
+    });
+})
+
+
+router.get("/delete-collectionCard/:id", async (req, res) => {
+   await adminHelper.deleteCollectionCard(req.params.id).then((response) => {
+    res.json({ status: true });
+
+
+    
+  });
+});
 
 
 module.exports = router;

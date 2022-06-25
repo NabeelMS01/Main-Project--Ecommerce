@@ -278,7 +278,7 @@ module.exports = {
         .get()
         .collection(collection.ORDER_COLLECTION)
         .find()
-        .sort({ time: -1 })
+        .sort({ date: -1 })
         .toArray();
 
       resolve(orders);
@@ -403,6 +403,64 @@ module.exports = {
       }
     });
   },
+
+
+
+//----------------------get sales by date---------------------------
+getAllOrdersByDate:(startDate,endDate)=>{
+  startDate=startDate.toString()
+  endDate=endDate.toString()
+console.log(startDate);
+  return new Promise(async(resolve,reject)=>{
+    let orders =await db.get().collection(collection.ORDER_COLLECTION).aggregate([
+      {$match:{
+       order_time:{
+        $gte: new Date(startDate),$lte:new Date(endDate)
+       }
+      }
+    },{
+      $sort:{date:1}
+    }
+    ]).toArray()
+
+    resolve(orders)
+  })
+
+
+}
+,
+getTotalRevenueByDate:(startDate,endDate)=>{
+  startDate=startDate.toString()
+  endDate=endDate.toString()
+  return new Promise(async(resolve,reject)=>{
+    console.log(startDate);
+    let totalAmount =await db.get().collection(collection.ORDER_COLLECTION).aggregate([
+      {$match:{
+       "order_time":{
+        $gte: new Date(startDate),$lte:new Date(endDate)
+       }
+      }
+    },{
+      $group: {
+        _id: 0,
+        total: {
+          $sum: "$totalAmount",
+        },
+      },
+    },
+    ]).toArray()
+ try{
+  resolve(totalAmount[0].total)
+ }catch (err){
+  resolve()
+ }
+  
+  
+  
+  })
+},
+
+
   //-------------------------------get cod sale report------------------
   getCodSale: () => {
     return new Promise(async (resolve, reject) => {
@@ -658,7 +716,7 @@ module.exports = {
   addBanner: (banner, files) => {
     return new Promise(async (resolve, reject) => {
       banner.image = files;
-      banner.status=true
+      banner.status = true;
       banner.sub_category_id = ObjectId(banner.sub_category_id);
 
       console.log(banner);
@@ -673,27 +731,209 @@ module.exports = {
     });
   },
 
-  getAllBanners:()=>{
-return new Promise(async(resolve,reject)=>{
+  editBanner: (id, banner, files) => {
+    console.log(id);
+    console.log("here is it");
+    return new Promise(async (resolve, reject) => {
+      banner.image = files;
+      banner.status = true;
+      banner.sub_category_id = ObjectId(banner.sub_category_id);
 
-  let banners=await db.get().collection(collection.BANNER_COLLECTION).find().toArray()
-  resolve(banners)
+      console.log(banner);
 
-
-})
-
-
-
+      await db
+        .get()
+        .collection(collection.BANNER_COLLECTION)
+        .updateOne(
+          { _id: ObjectId(id) },
+          {
+            $set: {
+              smallLabel: banner.smallLabel,
+              sub_category_id: banner.sub_category_id,
+              title: banner.title,
+              description: banner.description,
+              sub_category_id: banner.sub_category_id,
+              image: banner.image,
+            },
+          }
+        )
+        .then((response) => {
+          resolve();
+        });
+    });
   },
-  deleteBanner:(id)=>{
+
+  getAllBanners: () => {
+    return new Promise(async (resolve, reject) => {
+      let banners = await db
+        .get()
+        .collection(collection.BANNER_COLLECTION)
+        .find()
+        .toArray();
+      resolve(banners);
+    });
+  },
+  deleteBanner: (id) => {
+    return new Promise(async (resolve, reject) => {
+      await db
+        .get()
+        .collection(collection.BANNER_COLLECTION)
+        .deleteOne({ _id: ObjectId(id) })
+        .then((response) => {
+          resolve();
+        });
+    });
+  },
+  getBannerDetails: (id) => {
+    return new Promise(async (resolve, reject) => {
+      let banner = await db
+        .get()
+        .collection(collection.BANNER_COLLECTION)
+        .findOne({ _id: ObjectId(id) });
+
+      resolve(banner);
+    });
+  },
+  deactivateBanner: (id) => {
+    return new Promise(async (resolve, reject) => {
+      await db
+        .get()
+        .collection(collection.BANNER_COLLECTION)
+        .updateOne(
+          { _id: ObjectId(id) },
+          {
+            $set: {
+              status: false,
+            },
+          }
+        )
+        .then((response) => {
+          resolve();
+        });
+    });
+  },
+
+  activateBanner: (id) => {
+    return new Promise(async (resolve, reject) => {
+      await db
+        .get()
+        .collection(collection.BANNER_COLLECTION)
+        .updateOne(
+          { _id: ObjectId(id) },
+          {
+            $set: {
+              status: true,
+            },
+          }
+        )
+        .then((response) => {
+          resolve();
+        });
+    });
+  },
+
+  addCardCollection: (card, files) => {
+    return new Promise(async (resolve, reject) => {
+      card.image = files;
+      card.status = true;
+      card.sub_category_id = ObjectId(card.sub_category_id);
+
+      console.log(card);
+
+      await db
+        .get()
+        .collection(collection.CARD_SUB_CATEGORY_COLLECTION)
+        .insertOne(card)
+        .then((response) => {
+          resolve();
+        });
+    });
+  },
+  getCollectionCards: () => {
+    return new Promise(async (resolve, reject) => {
+      let getCollectionCards = await db
+        .get()
+        .collection(collection.CARD_SUB_CATEGORY_COLLECTION)
+        .find()
+        .toArray();
+
+      resolve(getCollectionCards);
+    });
+  },
+  deactivatecollectionCard: (id) => {
+    return new Promise(async (resolve, reject) => {
+      await db
+        .get()
+        .collection(collection.CARD_SUB_CATEGORY_COLLECTION)
+        .updateOne(
+          { _id: ObjectId(id) },
+          {
+            $set: {
+              status: false,
+            },
+          }
+        )
+        .then((response) => {
+          resolve();
+        });
+    });
+  },
+  activatecollectionCard: (id) => {
+    return new Promise(async (resolve, reject) => {
+      await db
+        .get()
+        .collection(collection.CARD_SUB_CATEGORY_COLLECTION)
+        .updateOne(
+          { _id: ObjectId(id) },
+          {
+            $set: {
+              status: true,
+            },
+          }
+        )
+        .then((response) => {
+          resolve(response);
+        });
+    });
+  },
+
+  getCollectionCardDetails: (id) => {
+    return new Promise(async (resolve, reject) => {
+      let cardDetails = await db
+        .get()
+        .collection(collection.CARD_SUB_CATEGORY_COLLECTION)
+        .findOne({ _id: ObjectId(id) });
+      resolve(cardDetails);
+    });
+  },
+  editCollectionCard: (id, data, files) => {
+    data.image = files;
+    return new Promise(async (resolve, reject) => {
+      await db
+        .get()
+        .collection(collection.CARD_SUB_CATEGORY_COLLECTION)
+        .updateOne(
+          { _id: ObjectId(id) },
+          {
+            $set: {
+              title: data.title,
+              image: data.image,
+            },
+          }
+        )
+        .then((response) => {
+          resolve();
+        });
+    });
+  },
+  deleteCollectionCard:(id)=>{
     return new Promise(async(resolve,reject)=>{
 
-await db.get().collection(collection.BANNER_COLLECTION).deleteOne({_id:ObjectId(id)}).then((response)=>{
-    resolve()
-})
+      await db.get().collection(collection.CARD_SUB_CATEGORY_COLLECTION).deleteOne({_id:ObjectId(id)}).then((response)=>{
+ resolve()
+      })
 
     })
   }
-
 
 };
