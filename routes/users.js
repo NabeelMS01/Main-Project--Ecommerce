@@ -386,6 +386,8 @@ router.post("/place-order", verifyLogin, async (req, res) => {
       .placeOrder(req.body, products, totalPrice,req.session.user._id,req.session.appliedCoupon)
       .then((orderId) => {
         res.json({ codsuccess: true });
+        req.session.coupondata = null;
+   req.session.couponmsg=null
       });
 
 
@@ -403,8 +405,10 @@ router.post("/place-order", verifyLogin, async (req, res) => {
       .generateRazorPay(orderId, totalPrice)
       .then((paymentResponse) => {
         // console.log(userData);
-
+        req.session.coupondata = null;
+        req.session.couponmsg=null
         res.json({ paymentResponse: paymentResponse, userData });
+        
       });
 
     //   res.json({ payment_status: true });
@@ -416,7 +420,10 @@ router.post("/place-order", verifyLogin, async (req, res) => {
       .generatePaypal(totalPrice, products, req.session.orderdata)
       .then((response) => {
         response.paypal = true;
+        req.session.coupondata = null;
+        req.session.couponmsg=null
         res.json({ response });
+     
       });
   }
 });
@@ -430,7 +437,7 @@ router.get("/success/:id", async (req, res) => {
   let products = await userHelper.getCartProducts(req.session.userData._id);
 
   userHelper.verifypaypal(payerId, paymentId, total).then((response) => {
-    userHelper.placeOrderOnline(data, products, total).then((response) => {
+    userHelper.placeOrderOnline(data, products, total,req.session.appliedCoupon,req.session.user._id).then((response) => {
       res.redirect("/orders");
     });
   });
@@ -447,7 +454,7 @@ router.post("/verify-payment", async (req, res) => {
     .then(async () => {
       console.log("payment Success,");
       await userHelper
-        .placeOrderOnline(req.session.orderdata, products, totalPrice)
+        .placeOrderOnline(req.session.orderdata, products, totalPrice,req.session.appliedCoupon)
         .then(() => {
           console.log("payment Success, order placed");
           res.json({ paymentstatus: true });
@@ -708,6 +715,11 @@ router.post("/apply-coupon", async (req, res) => {
             req.session.couponmsg = `coupon applied !! ₹ ${cart.coupon_offer} offer added`;
             res.json({ coupon, totalAmount, cart });
           });
+      }else{
+
+   res.json({couponused:true})
+
+
       }
     }
   } catch (err) {
@@ -724,10 +736,7 @@ req.session.coupondata = null;
     res.json({removed:true})
 
 
-  })
-  
-
-
+  }) 
 })
 
 module.exports = router;

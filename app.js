@@ -8,6 +8,7 @@ var session = require("express-session");
 var flash = require("connect-flash");
 // var fileUpload = require('express-fileUpload')
 var multer = require("multer");
+require("dotenv").config()
 
 // connect mongodb
 db.connect((err) => {

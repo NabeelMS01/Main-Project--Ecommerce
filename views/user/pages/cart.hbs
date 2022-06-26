@@ -77,50 +77,70 @@
             </div>
 
             {{#if products}}
-<div class="modal fade bd-example-modal-lg show-coupons" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content ">
-        <form  action="/applycodetocart" method="post" >
-                                <div class="row mt-5 mb-3">
-                                    {{#each couponCodes}}
+            <div class="modal fade bd-example-modal-lg show-coupons" tabindex="-1" role="dialog"
+                aria-labelledby="myLargeModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content ">
+                        <form action="/applycodetocart" method="post">
+                            <div class="row mt-5 mb-3">
+                                {{#if couponCodes}}
+                                {{#each couponCodes}}
 
 
 
 
-                                    <div class="col-5 m-auto    ">
-                                        <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
-                                            <div class="card-header m-auto">Coupon</div>
-                                            <div class="card-body m-auto">
-                                                <h5 class="card-title">₹ {{this.offer}} OFF</h5>
-                        <p class="card-text ">  <input class="mr-1" type="radio" name="coupon_code" value="{{this.coupon_code}}"> {{this.coupon_code}} </p>
-                                            </div>
+                                <div class="col-5 m-auto    ">
+                                    <div class="card text-white bg-dark mb-3" style="max-width: 18rem;">
+                                        <div class="card-header m-auto">Coupon</div>
+                                        <div class="card-body m-auto">
+                                            <h5 class="card-title">₹ {{this.offer}} OFF</h5>
+                                            <p class="card-text "> <input class="mr-1" type="radio" name="coupon_code"
+                                                    value="{{this.coupon_code}}" required > {{this.coupon_code}} </p>
                                         </div>
                                     </div>
-
-
-                                 
-                                    {{!-- <h4> <input type="radio" name="coupon_code" value="{{this.coupon_codes}}">
-                                        {{this.coupon_code}}</h4>
-                                    <small>₹{{this.offer}} OFF</small>--!}
- --}}
-
-
-
-
-
-
-                                    {{/each}}
-                                  <button style="width: 150px ;" class="btn btn-primary mb-4  m-auto  " >Apply Coupon</button>
                                 </div>
-                            </form>
-    </div>
-  </div>
+
+
+
+                                {{!-- <h4> <input type="radio" name="coupon_code" value="{{this.coupon_codes}}">
+                                    {{this.coupon_code}}</h4>
+                                <small>₹{{this.offer}} OFF</small>--!}
+                                --}}
+
+
+
+
+
+
+                                {{/each}}
+
+
+
+
+
+                             <div class="row" >   <button style="width: 150px ;" class="btn btn-primary mb-4  m-auto  ">Use
+                                    Coupon</button></div>
+{{else}}
+
+<div style="height: 400px;" class="row">
+
+<div class="col-10 m-auto" ><h4 class="m-auto" >Sorry we have no coupons available at the moment !!</h4></div>
+ 
 </div>
+
+
+
+                                    {{/if}}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
             <!-- Modal -->
-            {{!-- <div class="modal fade " id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-                aria-hidden="true">
+            {{!-- <div class="modal fade " id="exampleModal" tabindex="-1" role="dialog"
+                aria-labelledby="exampleModalLabel" aria-hidden="true">
                 <div class="modal-dialog" role="document">
-                    <div  class="modal-content m-auto r-0 ">
+                    <div class="modal-content m-auto r-0 ">
                         <div class="modal-header">
                             <h5 class="modal-title" id="exampleModalLabel">Available coupons</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -129,7 +149,7 @@
                         </div>
                         <div class="modal-body">
 
-                          
+
 
 
                         </div>
@@ -143,9 +163,9 @@
             <div class="col-lg-4">
                 <div class="cart__discount">
                     <h6>Discount codes</h6>
-                    <span id="invalidCouponSpan" class="text-danger" ></span>
+                    <span id="invalidCouponSpan" class="text-danger"></span>
                     <form id="couponform">
-                        
+
                         <input onkeyup="invalidCoupon()" name="coupon_code" type="text" value="{{couponcode}}">
                         <button type="submit">Apply</button>
                     </form>
@@ -154,9 +174,11 @@
 
 
                 </div>
- {{#if couponmsg}}
-       <span id="couponmsgspan" class="text-danger" >{{couponmsg}}</span> <span onclick="removeCoupon('{{cart._id}}')" style="color: rgb(0, 47, 255); cursor: pointer; "   id="removecpn" >remove coupon</span>
-{{/if}}
+                {{#if couponmsg}}
+                <span id="couponmsgspan" class="text-danger">{{couponmsg}}</span> <span
+                    onclick="removeCoupon('{{cart._id}}')" style="color: rgb(0, 47, 255); cursor: pointer; "
+                    id="removecpn">remove coupon</span>
+                {{/if}}
 
                 <div class="cart__total">
                     <h6>Cart total</h6>
@@ -242,67 +264,67 @@
 </div>
 
 <script>
-  let errorSpan=document.getElementById('invalidCouponSpan')
- let couponSpan=document.getElementById('couponmsgspan')
-   let removecpn=document.getElementById('removecpn')
+    let errorSpan = document.getElementById('invalidCouponSpan')
+    let couponSpan = document.getElementById('couponmsgspan')
+    let removecpn = document.getElementById('removecpn')
 
 
 
 
- function removeCoupon(id){
+    function removeCoupon(id) {
 
-    
 
-      swal({
-          title: "Are you sure? You want to remove the coupon from cart",
-          icon: "warning",
-          buttons: true,
-          dangerMode: true,
+
+        swal({
+            title: "Are you sure? You want to remove the coupon from cart",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
         })
-          .then((willDelete) => {
-            if (willDelete) {
-    
-    
-    
-            $.ajax(
-                {
-                    url: `/removecoupon/${id}`,
-                   
-                    method: "GET",
-                    success: (response) => {
-                        if(response.removed){
-    
-                        
-                        swal("Poof! coupon removed from cart!", {
-                        icon: "success",
-                      }).then(
-                          ()=>{
-                              location.reload()
-                          }
-                      )
-    
-    
-    
-                               
+            .then((willDelete) => {
+                if (willDelete) {
+
+
+
+                    $.ajax(
+                        {
+                            url: `/removecoupon/${id}`,
+
+                            method: "GET",
+                            success: (response) => {
+                                if (response.removed) {
+
+
+                                    swal("Poof! coupon removed from cart!", {
+                                        icon: "success",
+                                    }).then(
+                                        () => {
+                                            location.reload()
+                                        }
+                                    )
+
+
+
+
+                                }
+
+
+                            }
                         }
-                   
-    
-                    }
+                    )
                 }
-            )
-            }
-        })
-}
+            })
+    }
 
 
 
 
 
-  function invalidCoupon(){
-   
+    function invalidCoupon() {
 
-errorSpan.innerText=null
-  }
+
+        errorSpan.innerText = null
+    }
 
 
     $("#couponform").submit(function (e) {
@@ -315,36 +337,40 @@ errorSpan.innerText=null
             method: 'post',
             data: $('#couponform').serialize(),
             success: function (response) {
-                if(response.invalidCoupon){
-  
+                if (response.invalidCoupon) {
 
-errorSpan.innerText="invalid coupon"
+
+                    errorSpan.innerText = "invalid coupon"
 
                 }
- 
+
+                if (response.couponused) {
+                    errorSpan.innerText = "already used this coupon"
+                }
+
                 if (response.coupon) {
 
-      console.log(response.cart)
-  
+                    console.log(response.cart)
 
-    location.href="/cart"
-  
-      
-  couponSpan.innerText=`coupon applied !! ₹ ${response.coupon.offer} offer added `
+
+                    location.href = "/cart"
+
+
+                    couponSpan.innerText = `coupon applied !! ₹ ${response.coupon.offer} offer added `
 
                     /*swal("Offer added successfully!", "!", "success").then(
                         () => {
                             location.href = '/admin/category-offer'
                         }
                     ); */
-                   
-                    
-                }else{
 
-                     couponSpan.innerText="Invalid coupon"
+
+                } else {
+
+                    couponSpan.innerText = "Invalid coupon"
                 }
 
-           
+
 
 
 

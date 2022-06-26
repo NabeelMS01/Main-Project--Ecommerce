@@ -16,14 +16,14 @@ const adminHelper = require("./adminHelper");
 paypal.configure({
   mode: "sandbox", //sandbox or live
   client_id:
-    "AXsoo5XqDTfQZQmjBTZTgM0npkYzCs6H90HKxMBZlhZJVceZsMHE5bEeRLPZFA2L13m7sfgbgdS3A-CT",
+    process.env.CLIENTID,
   client_secret:
-    "EBTeRIdqDmSixD6uWGmuDwFbM9FkJSwQScK1wlrv82t8zCjqFxmQnODQLrY-sy-2qwpCYOwAdNllKzB-",
+  process.env.CLIENTSECRET,
 });
 
 var instance = new Razorpay({
-  key_id: "rzp_test_r82SUG9YhhYa4M",
-  key_secret: "3J69cSPac1Du7CjKKH9k8lKL",
+  key_id: process.env.KEYID,
+  key_secret: process.env.KEYSECRET,
 });
 
 module.exports = {
@@ -581,14 +581,16 @@ module.exports = {
         .get()
         .collection(collection.CART_COLLECTION)
         .findOne({ user: ObjectId(userId) });
- 
-      if (cartOffer.coupon_offer_status) {
-        cartTotalAmount[0].total =
-          cartTotalAmount[0].total - cartOffer.coupon_offer;
+
+      if (cartOffer) {
+        if (cartOffer.coupon_offer_status) {
+          cartTotalAmount[0].total =
+            cartTotalAmount[0].total - cartOffer.coupon_offer;
+        }
       }
       console.log("55555555555555");
       console.log(cartTotalAmount[0]);
-   
+
       if (cartTotalAmount[0] === undefined) {
         resolve();
       } else {
@@ -662,7 +664,7 @@ module.exports = {
   },
 
   // ------------------place order--------------------
-  placeOrder: (order, products, total,id,coupon) => {
+  placeOrder: (order, products, total, id, coupon) => {
     return new Promise(async (resolve, reject) => {
       let status = order["payment_method"] === "cod" ? "placed" : "pending";
 
@@ -684,21 +686,17 @@ module.exports = {
         delivery_status: false,
       };
 
-
-      if(coupon){
-
-await db.get().collection(collection.USER_COLLECTION).updateOne({_id:ObjectId(id)},{
-$push:{used_coupons:coupon.coupon_code}
-})
-
-  
+      if (coupon) {
+        await db
+          .get()
+          .collection(collection.USER_COLLECTION)
+          .updateOne(
+            { _id: ObjectId(id) },
+            {
+              $push: { used_coupons: coupon.coupon_code },
+            }
+          );
       }
-
-      
-
-
-
-
 
       db.get()
         .collection(collection.ORDER_COLLECTION)
@@ -713,7 +711,7 @@ $push:{used_coupons:coupon.coupon_code}
         });
     });
   },
-  placeOrderOnline: (order, products, total) => {
+  placeOrderOnline: (order, products, total, coupon,userId) => {
     return new Promise(async (resolve, reject) => {
       console.log(total);
 
@@ -737,15 +735,27 @@ $push:{used_coupons:coupon.coupon_code}
         delivery_status: false,
       };
 
-      db.get()
+      await db
+        .get()
         .collection(collection.ORDER_COLLECTION)
         .insertOne(orderObj)
-        .then((response) => {
+        .then(async (response) => {
           db.get()
             .collection(collection.CART_COLLECTION)
             .deleteOne({ user: ObjectId(order.userId) });
-          console.log("333333333333333333333333333");
-          console.log(response.insertedId.toString());
+          
+          if (coupon) {
+            await db
+              .get()
+              .collection(collection.USER_COLLECTION)
+              .updateOne(
+                { _id: ObjectId(userId) },
+                {
+                  $push: { used_coupons: coupon.coupon_code },
+                }
+              );
+          }
+
           resolve(response.insertedId.toString());
         });
     });
@@ -1082,20 +1092,23 @@ $push:{used_coupons:coupon.coupon_code}
     });
   },
 
-  removeCouponFromCart:(id)=>{
-    return new Promise(async(resolve,reject)=>{
-await db.get().collection(collection.CART_COLLECTION).updateOne({_id:ObjectId(id)},{
-  $set:{ 
-    coupon_offer:parseInt(0),
-    coupon_offer_status:false
-  }
-}).then((response)=>{
-  resolve()
-})
-
-
-    })
-  }
-
-
+  removeCouponFromCart: (id) => {
+    return new Promise(async (resolve, reject) => {
+      await db
+        .get()
+        .collection(collection.CART_COLLECTION)
+        .updateOne(
+          { _id: ObjectId(id) },
+          {
+            $set: {
+              coupon_offer: parseInt(0),
+              coupon_offer_status: false,
+            },
+          }
+        )
+        .then((response) => {
+          resolve();
+        });
+    });
+  },
 };
